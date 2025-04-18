@@ -38,10 +38,7 @@ const RegistrarUsuario = () => {
             verificarCorreo(value);
         }
 
-
-
     };
-
 
 
     const verificarCorreo = (email) => {
