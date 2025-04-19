@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
 
 const Login = () => {
@@ -7,7 +8,9 @@ const Login = () => {
     password: '',
   });
   const [emailError, setEmailError] = useState('');
+  const [loginError, setLoginError] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const { login } = useAuth();
   const navigate = useNavigate();
 
   // Validación de correo electrónico
@@ -31,6 +34,9 @@ const Login = () => {
         setEmailError('');
       }
     }
+
+    // Limpiar errores al escribir
+    if (loginError) setLoginError('');
   };
 
   const handleSubmit = (e) => {
@@ -43,19 +49,25 @@ const Login = () => {
     }
 
     if (!formData.password) {
-      alert('Ingrese su contraseña');
+      setLoginError('Ingrese una contraseña');
       return;
     }
 
-    // Simular inicio de sesión exitoso
-    console.log('Inicio de sesión exitoso:', formData);
-    navigate('/mapa');
+    // Autenticación simplificada (acepta cualquier combinación válida)
+    login(formData.email); // Guarda el email en el contexto/auth
+    navigate('/mapa'); // Redirige a la página protegida
   };
 
   return (
     <div className="min-h-screen w-full bg-[url('/assets/fondo.png')] flex items-center justify-center p-4">
       <div className="bg-white bg-opacity-95 p-6 md:p-8 rounded-lg shadow-lg w-full max-w-md">
         <h1 className="text-2xl font-bold text-gray-800 text-center mb-6">Iniciar Sesión</h1>
+
+        {loginError && (
+          <div className="mb-4 p-2 bg-red-100 text-red-700 rounded text-center">
+            {loginError}
+          </div>
+        )}
 
         <form className="space-y-4" onSubmit={handleSubmit}>
           <div>
@@ -111,5 +123,3 @@ const Login = () => {
 };
 
 export default Login;
-
-
