@@ -5,6 +5,7 @@ import './index.css';
 import Login from './pages/LogIn';
 import RegistrarUsuario from './pages/RegistrarUsuario';
 import MapaMascota from './pages/MapaMascota';
+import PruebaQR from './pages/PruebaQr.jsx'
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
