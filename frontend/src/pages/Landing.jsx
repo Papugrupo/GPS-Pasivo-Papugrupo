@@ -3,23 +3,29 @@ import Login from './Login';
 
 export default function Landing() {
   return (
-    <div className="relative min-h-screen w-full bg-[url('/assets/fondo.png')] bg-cover bg-center">
-      
+    <div className="min-h-screen w-full bg-[url('/assets/fondo.png')] bg-cover bg-center">
       {/* Hero Section flotante - ancho completo, más alto y fuente más grande */}
-      <div className="absolute top-24 w-full bg-primary text-center py-16 px-6 shadow-md">
-        <h1 className="text-6xl md:text-7xl font-bold text-darkNeutral drop-shadow-lg">PET-GPS</h1>
-        <p className="mt-4 text-lg md:text-xl font-medium text-darkNeutral drop-shadow">
-          GPS Pasivo para Mascotas
-        </p>
+      <div className="pt-5">
+        <div className="w-full bg-primary text-center py-12 px-6 shadow-md">
+            <h1 className="text-6xl md:text-7xl font-bold text-darkNeutral drop-shadow-lg">PET-GPS</h1>
+            <p className="mt-4 text-lg md:text-xl font-medium text-darkNeutral drop-shadow">
+            GPS Pasivo para Mascotas
+            </p>
+        </div>
+    </div>
+
+      {/* Contenedor principal con flexbox y espaciado adecuado */}
+      <div className="flex flex-col items-center justify-start p-4">
+        {/* Login Box flotante */}
+        <div className="w-full md:w-100 bg-white shadow-xl rounded-2xl p-6 text-left">
+          <Login />
+        </div>
       </div>
 
-      {/* Login Box flotante */}
-      <div className="absolute top-15 right-10 bg-white shadow-xl rounded-2xl p-6 w-80 text-left">
-        <Login />
-      </div>
+
 
       {/* Content Section (más abajo) */}
-      <div className="pt-100 grid grid-cols-1 md:grid-cols-3 gap-4 p-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4">
         {[...Array(3)].map((_, i) => (
           <div key={i} className="bg-white rounded shadow overflow-hidden">
             <img
