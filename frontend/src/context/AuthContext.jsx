@@ -8,8 +8,13 @@ export function AuthProvider({ children }) {
   // Verificar si hay sesión al cargar
   useEffect(() => {
     const storedUser = localStorage.getItem('user');
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
+    try {
+      if (storedUser && storedUser !== "undefined") {
+        setUser(JSON.parse(storedUser));
+      }
+    } catch (error) {
+      console.error("Error parsing stored user", error);
+      localStorage.removeItem('user'); // limpia el localStorage corrupto
     }
   }, []);
 
