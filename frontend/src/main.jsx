@@ -7,7 +7,7 @@ import RegistrarUsuario from './pages/RegistrarUsuario';
 import MapaMascota from './pages/MapaMascota';
 import PruebaQR from './pages/PruebaQr.jsx';
 import { AuthProvider } from './context/AuthContext.jsx';
-import { PrivateRoute } from './components/PrivateRoute';
+import { PrivateRoute } from './routes/PrivateRoute';
 import Landing from './pages/Landing.jsx';
 
 
