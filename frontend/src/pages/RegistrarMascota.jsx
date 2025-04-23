@@ -83,14 +83,7 @@ const RegistrarMascota = () => {
     setMascotas(nuevasMascotas);
   };
 
-  const obtenerBaseURL = () => {
-    if (import.meta.env.PROD) {
-      const { protocol, hostname } = window.location;
-      return `${protocol}//${hostname}`;
-    } else {
-      return __DEV_IP__; // Definido en vite.config.js
-    }
-  };
+
 
 
   const descargarQR = async (texto = 'vacio') => {
@@ -200,7 +193,7 @@ const RegistrarMascota = () => {
     }
   
     // Si todo está bien, continúa con el guardado
-    console.log(obtenerBaseURL() + '/mapa');
+    //console.log(obtenerBaseURL() + '/mapa');
     setIsModalOpen(true);
     console.log('Todas las mascotas registradas:', mascotas);
   };
@@ -290,6 +283,7 @@ const RegistrarMascota = () => {
                     <input
                       type={name.includes("fecha") ? "date" : "text"}
                       name={name}
+                      placeholder='Nombre/Nick de la mascota'
                       value={mascota[name]}
                       onChange={(e) => handleChange(index, e)}
                       className="w-full bg-gray-100 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
@@ -382,6 +376,16 @@ const RegistrarMascota = () => {
                   <input
                     type={name.includes("fecha") ? "date" : "text"}
                     name={name}
+                    placeholder={
+                        label.includes("Color") ? "Negro,Blanco,Café,Dorado..." : 
+                        label.includes("Tamaño") ? 'Pequeño,Mediano,Grande': 
+                        label.includes("Número de Microchip") ? '123456789123456' : 
+                        label.includes("Condiciones Médicas") ? 'Ingresa condiciones médicas si existen' :
+                        label.includes("Nombre Veterinario") ? 'Ingresa el nombre del veterinario' :
+                        label.includes("Teléfono Veterinario") ? 'Ingresa el número de teléfono del veterinario':
+                        label.includes("Comportamiento") ? 'Pasivo,Cariñoso,Agresivo,Indiferente...':
+                        label.includes("Observaciones") ? 'Ingresa alguna observación' : '' 
+                    }
                     value={mascota[name]}
                     onChange={(e) => handleChange(index, e)}
                     className="w-full bg-gray-100 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
