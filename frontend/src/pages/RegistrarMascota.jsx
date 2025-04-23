@@ -1,17 +1,51 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
+import { QRCodeCanvas } from 'qrcode.react';
+import QRCode from 'qrcode';
+import JSZip from 'jszip';
+import { saveAs } from 'file-saver';
+import { useEffect } from 'react';
 
-const especieOptions = ['Perro', 'Gato', 'Ave', 'Conejo', 'Otro'];
+
+
+const especieOptions = ['Seleccionar...','Perro', 'Gato', 'Ave', 'Conejo', 'Otro'];
 const razaOptions = {
-  Perro: ['Labrador', 'Poodle', 'Bulldog', 'Pastor Alemán'],
-  Gato: ['Persa', 'Siames', 'Maine Coon', 'Sphynx'],
-  Ave: ['Periquito', 'Canario', 'Loro'],
-  Conejo: ['Enano', 'Cabeza de León', 'Angora'],
+  Perro: ['Seleccionar...','Labrador', 'Poodle', 'Bulldog', 'Pastor Alemán','Otro'],
+  Gato: ['Seleccionar...','Persa', 'Siames', 'Maine Coon', 'Sphynx','Otro'],
+  Ave: ['Seleccionar...','Periquito', 'Canario', 'Loro','Otro'],
+  Conejo: ['Enano', 'Cabeza de León', 'Angora','Otro'],
   Otro: ['Otro']
+};
+const sexoOptions = ['Seleccionar...','Macho','Hembra']
+
+const Modal = ({ isOpen, onClose, children }) => {
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 z-50  flex items-center justify-center">
+      {/* Fondo con opacidad */}
+      <div
+        className="absolute inset-0 bg-black"
+        style={{ opacity: 0.6 }} // 
+        onClick={onClose}
+      />
+
+      {/* Contenido del modal */}
+      <div className="relative bg-white rounded-xl p-6 shadow-xl z-10 max-w-md w-full">
+        <button
+          onClick={onClose}
+          className="absolute top-2 right-2 text-gray-500 hover:text-black"
+        >
+          ✖
+        </button>
+        {children}
+      </div>
+    </div>
+  );
 };
 
 const nuevaMascota = () => ({
   nombre: '',
-  especie: 'Perro',
+  especie: '',
   raza: '',
   sexo: '',
   fechaNacimiento: '',
@@ -31,14 +65,74 @@ const nuevaMascota = () => ({
 });
 
 const RegistrarMascota = () => {
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const [mascotas, setMascotas] = useState([nuevaMascota()]);
   const [tabActiva, setTabActiva] = useState(0);
+
+  const [idMascotas, setIdMascotas] = useState();
+  const [textoQR, setTextoQR] = useState('');
+  const qrRef = useRef(null);
+
+  const [intentadoGuardar, setIntentadoGuardar] = useState(false);
+
 
   const handleChange = (index, e) => {
     const { name, value, type, checked } = e.target;
     const nuevasMascotas = [...mascotas];
     nuevasMascotas[index][name] = type === 'checkbox' ? checked : value;
     setMascotas(nuevasMascotas);
+  };
+
+  const obtenerBaseURL = () => {
+    if (import.meta.env.PROD) {
+      const { protocol, hostname } = window.location;
+      return `${protocol}//${hostname}`;
+    } else {
+      return __DEV_IP__; // Definido en vite.config.js
+    }
+  };
+
+
+  const descargarQR = async (texto = 'vacio') => {
+    try {
+      const dataURL = await QRCode.toDataURL(texto); // Generar el QR en base64
+  
+      // Convertir base64 a Blob
+      const res = await fetch(dataURL);
+      const blob = await res.blob();
+  
+      // Crear URL temporal para descarga
+      const url = URL.createObjectURL(blob);
+  
+      // Crear link de descarga
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `qr-${texto}.png`;
+      link.style.display = 'none';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+  
+      // Liberar memoria
+      URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error('Error al generar/descargar el QR:', err);
+    }
+  };
+
+  const generarZipConQRs = async (textos = ['uno', 'dos', 'tres']) => {
+    const zip = new JSZip();
+    const carpeta = zip.folder('QRs-Mascotas'); // Opcional: carpeta dentro del zip
+  
+    for (let texto of textos) {
+      const dataURL = await QRCode.toDataURL(texto);
+      const res = await fetch(dataURL);
+      const blob = await res.blob();
+      carpeta.file(`qr-${texto || 'vacio'}.png`, blob);
+    }
+  
+    const contenidoZip = await zip.generateAsync({ type: 'blob' });
+    saveAs(contenidoZip, 'GPS-Papugrupo-QRS.zip');
   };
 
   const handleImageUpload = (index, e) => {
@@ -74,8 +168,41 @@ const RegistrarMascota = () => {
   };
 
   const guardarMascotas = () => {
+    // Validación: asegurar que todas las mascotas tengan nombre
+    const mascotasSinNombre = mascotas.filter(m => !m.nombre.trim());
+    const mascotasSinSexo = mascotas.filter(m => !m.sexo.trim() || m.sexo == 'Seleccionar...');
+    const mascotasSinEspecie = mascotas.filter(m => !m.especie.trim() || m.especie == 'Seleccionar...');
+    const mascotasSinRaza = mascotas.filter(m => !m.raza.trim() || m.raza == 'Seleccionar...');
+    
+    setIntentadoGuardar(true);
+
+    let textoAlerta = "";
+
+    if(mascotasSinNombre.length > 0){
+      textoAlerta = textoAlerta + "Todas las mascotas deben tener un nombre antes de guardar.\n"
+    }
+
+    if(mascotasSinSexo.length > 0){
+      textoAlerta = textoAlerta + "Todas las mascotas deben tener seleccionado un sexo antes de guardar.\n"
+    }
+
+    if(mascotasSinEspecie.length > 0){
+      textoAlerta = textoAlerta + "Todas las mascotas deben tener seleccionado una especie antes de guardar.\n"
+    }
+
+    if(mascotasSinRaza.length > 0){
+      textoAlerta = textoAlerta + "Todas las mascotas deben tener seleccionada una raza antes de guardar.\n"
+    }
+  
+    if (textoAlerta.length > 0) {
+      alert(textoAlerta);
+      return; // No continúa si hay mascotas sin nombre
+    }
+  
+    // Si todo está bien, continúa con el guardado
+    console.log(obtenerBaseURL() + '/mapa');
+    setIsModalOpen(true);
     console.log('Todas las mascotas registradas:', mascotas);
-    alert('Mascotas guardadas en consola');
   };
 
   return (
@@ -155,50 +282,86 @@ const RegistrarMascota = () => {
                 )}
 
               {[
-                ['nombre', 'Nombre'],
-                ['sexo', 'Sexo'],
+                ['nombre', 'Nombre*']
               ].map(([name, label]) => (
                 <div key={name} className="flex flex-col sm:flex-row sm:items-center sm:space-x-4">
-                  <label htmlFor={name} className="text-gray-700 font-semibold sm:w-40">{label}</label>
-                  <input
-                    type={name.includes("fecha") ? "date" : "text"}
-                    name={name}
-                    value={mascota[name]}
-                    onChange={(e) => handleChange(index, e)}
-                    className="w-full bg-gray-100 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
-                  />
+                  <label htmlFor={name} className="text-gray-700 font-semibold sm:w-40 top-0 relative">{label}</label>
+                  <div className='flex flex-col w-full'>
+                    <input
+                      type={name.includes("fecha") ? "date" : "text"}
+                      name={name}
+                      value={mascota[name]}
+                      onChange={(e) => handleChange(index, e)}
+                      className="w-full bg-gray-100 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+                    />
+                    {name == 'nombre' && intentadoGuardar && mascota[name] == '' ? (
+                      <label className='pl-4 text-red-500'>Debes ingresar el nombre de la mascota</label>
+                    ): null}
+                  </div>
                 </div>
               ))}
+
+              {/* Sexo Dropdown */}
+              <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-4">
+                <label className="text-gray-700 font-semibold sm:w-40">Sexo*</label>
+                <div className='flex flex-col w-full'>
+                  <select
+                    name="sexo"
+                    value={mascota.sexo}
+                    onChange={(e) => handleChange(index, e)}
+                    className="w-full bg-gray-100 px-4 py-2 border rounded-lg"
+                  >
+                    {sexoOptions.map(op => (
+                      <option key={op} value={op}>{op}</option>
+                    ))}
+                  </select>
+                  { intentadoGuardar && (mascota.sexo == 'Seleccionar...' || mascota.sexo == '') ? (
+                    <label className='pl-4 text-red-500'>Debes seleccionar un valor</label>
+                  ): null}
+                </div>
+              </div>
 
 
               {/* Especie Dropdown */}
               <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-4">
-                <label className="text-gray-700 font-semibold sm:w-40">Especie</label>
-                <select
-                  name="especie"
-                  value={mascota.especie}
-                  onChange={(e) => handleChange(index, e)}
-                  className="w-full bg-gray-100 px-4 py-2 border rounded-lg"
-                >
-                  {especieOptions.map(op => (
-                    <option key={op} value={op}>{op}</option>
-                  ))}
-                </select>
+                <label className="text-gray-700 font-semibold sm:w-40">Especie*</label>
+                <div className='flex flex-col w-full'>
+                  <select
+                    name="especie"
+                    value={mascota.especie}
+                    onChange={(e) => handleChange(index, e)}
+                    className="w-full bg-gray-100 px-4 py-2 border rounded-lg"
+                  >
+                    {especieOptions.map(op => (
+                      <option key={op} value={op}>{op}</option>
+                    ))}
+                  </select>
+                  { intentadoGuardar && (mascota.especie == 'Seleccionar...' || mascota.especie == '') ? (
+                    <label className='pl-4 text-red-500'>Debes seleccionar un valor</label>
+                  ): null}
+                </div>
               </div>
 
               {/* Raza Dropdown */}
               <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-4">
-                <label className="text-gray-700 font-semibold sm:w-40">Raza</label>
-                <select
-                  name="raza"
-                  value={mascota.raza}
-                  onChange={(e) => handleChange(index, e)}
-                  className="w-full bg-gray-100 px-4 py-2 border rounded-lg"
-                >
-                  {razaOptions[mascota.especie || 'Otro'].map(op => (
-                    <option key={op} value={op}>{op}</option>
-                  ))}
-                </select>
+                <label className="text-gray-700 font-semibold sm:w-40">Raza*</label>
+                <div className='flex flex-col w-full'>
+                  <select
+                    name="raza"
+                    value={mascota.raza}
+                    onChange={(e) => handleChange(index, e)}
+                    className="w-full bg-gray-100 px-4 py-2 border rounded-lg"
+                  >
+                    {mascota.especie != "Seleccionar..." ? (
+                      razaOptions[mascota.especie || 'Otro'].map(op => (
+                        <option key={op} value={op}>{op}</option>
+                      ))
+                    ) : ''}
+                  </select>
+                  { intentadoGuardar && (mascota.raza == 'Seleccionar...' || mascota.raza == '')  ? (
+                      <label className='pl-4 text-red-500'>Debes seleccionar una raza</label>
+                    ): null}
+                  </div>
               </div>
 
                 {[
@@ -223,6 +386,7 @@ const RegistrarMascota = () => {
                     onChange={(e) => handleChange(index, e)}
                     className="w-full bg-gray-100 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
                   />
+                  
                 </div>
               ))}
 
@@ -263,6 +427,30 @@ const RegistrarMascota = () => {
             {mascotas.length > 1 ? "Registrar todas las mascotas": "Registrar mascota"}
           </button>
         </div>
+        <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
+          
+          <h2 className="text-xl font-bold mb-4">
+            {mascotas.length > 1 ? "Registro exitoso de mascotas!" : "Registro exitoso de mascota"}
+          </h2>
+          <p> Ahora puedes descargar las imágenes QR de cada mascota o descargar un archivo
+            comprimido con todas las imágenes.
+          </p>
+          <p>No te preocupes, puedes descargar los QR en otro momento desde el listado de mascotas!</p>
+          {mascotas.map((mascota,index) =>(
+            <div key={index} className='py-2'>
+              <div className='flex justify-between items-center'>
+                <p className='pl-4'>{mascota.nombre}</p>
+                <button className="px-4 py-2 bg-blue-400 text-white rounded-lg font-semibold hover:bg-green-600" >Descargar QR</button>
+              </div>
+            </div>
+
+          ))}
+          { mascotas.length > 1 ? (
+            <div className='flex justify-end pt-8'>
+              <button className="px-4 py-2 bg-green-500 text-white rounded-lg font-semibold hover:bg-green-600" >Descargar zip con QR</button>
+            </div>
+            ) : null }
+        </Modal>
       </div>
     </div>
   );
