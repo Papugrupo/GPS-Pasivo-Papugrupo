@@ -4,6 +4,7 @@ import QRCode from 'qrcode';
 import JSZip from 'jszip';
 import { saveAs } from 'file-saver';
 import { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 
 
@@ -13,9 +14,11 @@ const razaOptions = {
   Gato: ['Seleccionar...','Persa', 'Siames', 'Maine Coon', 'Sphynx','Otro'],
   Ave: ['Seleccionar...','Periquito', 'Canario', 'Loro','Otro'],
   Conejo: ['Enano', 'Cabeza de León', 'Angora','Otro'],
-  Otro: ['Otro']
+  Otro: ['Seleccionar...','Otro']
 };
 const sexoOptions = ['Seleccionar...','Macho','Hembra']
+
+
 
 const Modal = ({ isOpen, onClose, children }) => {
   if (!isOpen) return null;
@@ -64,16 +67,35 @@ const nuevaMascota = () => ({
   observaciones: ''
 });
 
+const urlBaseQR = 'https://gps.bustamantedev.cl/registrar-ubicacion'
+
 const RegistrarMascota = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [mascotas, setMascotas] = useState([nuevaMascota()]);
   const [tabActiva, setTabActiva] = useState(0);
+
+  const navigate = useNavigate()
 
   const [idMascotas, setIdMascotas] = useState();
   const [textoQR, setTextoQR] = useState('');
   const qrRef = useRef(null);
 
   const [intentadoGuardar, setIntentadoGuardar] = useState(false);
+
+  const [registroResponse,setRegistroResponse] = useState([
+    {
+        nombreMascota: 'Boby',
+        idMascota: '9f5cae14-a465-497b-9645-5e1325ffbb03' 
+    },
+    {
+        nombreMascota: 'Rito',
+        idMascota: '9f5cae14-a465-497b-9645-8e1325ffbb03' 
+    },
+    {
+        nombreMascota: 'Ryley',
+        idMascota: '9f5cae14-a465-497b-9645-1e1325ffbb03' 
+    }
+  ])
 
 
   const handleChange = (index, e) => {
@@ -83,12 +105,9 @@ const RegistrarMascota = () => {
     setMascotas(nuevasMascotas);
   };
 
-
-
-
-  const descargarQR = async (texto = 'vacio') => {
+  const descargarQR = async (mascota) => {
     try {
-      const dataURL = await QRCode.toDataURL(texto); // Generar el QR en base64
+      const dataURL = await QRCode.toDataURL(urlBaseQR+"/"+mascota.idMascota); // Generar el QR en base64
   
       // Convertir base64 a Blob
       const res = await fetch(dataURL);
@@ -100,7 +119,7 @@ const RegistrarMascota = () => {
       // Crear link de descarga
       const link = document.createElement('a');
       link.href = url;
-      link.download = `qr-${texto}.png`;
+      link.download = `qr-${mascota.nombreMascota}.png`;
       link.style.display = 'none';
       document.body.appendChild(link);
       link.click();
@@ -113,16 +132,18 @@ const RegistrarMascota = () => {
     }
   };
 
-  const generarZipConQRs = async (textos = ['uno', 'dos', 'tres']) => {
+  const generarZipConQRs = async () => {
     const zip = new JSZip();
-    const carpeta = zip.folder('QRs-Mascotas'); // Opcional: carpeta dentro del zip
-  
-    for (let texto of textos) {
-      const dataURL = await QRCode.toDataURL(texto);
-      const res = await fetch(dataURL);
-      const blob = await res.blob();
-      carpeta.file(`qr-${texto || 'vacio'}.png`, blob);
-    }
+    const carpeta = zip.folder('QRs-Mascotas');
+
+    await Promise.all(
+        registroResponse.map(async (response) => {
+          const dataURL = await QRCode.toDataURL(urlBaseQR + "/" + response.idMascota);
+          const res = await fetch(dataURL);
+          const blob = await res.blob();
+          carpeta.file(`qr-${response.nombreMascota || 'vacio'}.png`, blob);
+        })
+      );
   
     const contenidoZip = await zip.generateAsync({ type: 'blob' });
     saveAs(contenidoZip, 'GPS-Papugrupo-QRS.zip');
@@ -141,6 +162,10 @@ const RegistrarMascota = () => {
       });
     }
   };
+
+  const closeModalHandler =()=>{
+    navigate('/mapa')
+  }
 
   // Función para eliminar la imagen
     const handleRemoveImage = (index) => {
@@ -161,39 +186,33 @@ const RegistrarMascota = () => {
   };
 
   const guardarMascotas = () => {
-    // Validación: asegurar que todas las mascotas tengan nombre
-    const mascotasSinNombre = mascotas.filter(m => !m.nombre.trim());
-    const mascotasSinSexo = mascotas.filter(m => !m.sexo.trim() || m.sexo == 'Seleccionar...');
-    const mascotasSinEspecie = mascotas.filter(m => !m.especie.trim() || m.especie == 'Seleccionar...');
-    const mascotasSinRaza = mascotas.filter(m => !m.raza.trim() || m.raza == 'Seleccionar...');
-    
     setIntentadoGuardar(true);
-
-    let textoAlerta = "";
-
-    if(mascotasSinNombre.length > 0){
-      textoAlerta = textoAlerta + "Todas las mascotas deben tener un nombre antes de guardar.\n"
-    }
-
-    if(mascotasSinSexo.length > 0){
-      textoAlerta = textoAlerta + "Todas las mascotas deben tener seleccionado un sexo antes de guardar.\n"
-    }
-
-    if(mascotasSinEspecie.length > 0){
-      textoAlerta = textoAlerta + "Todas las mascotas deben tener seleccionado una especie antes de guardar.\n"
-    }
-
-    if(mascotasSinRaza.length > 0){
-      textoAlerta = textoAlerta + "Todas las mascotas deben tener seleccionada una raza antes de guardar.\n"
+  
+    const errores = [];
+  
+    mascotas.forEach((m, idx) => {
+      if (!m.nombre.trim()) {
+        errores.push(`Mascota ${idx + 1}: falta el nombre.`);
+      }
+      if (!m.sexo || m.sexo === 'Seleccionar...') {
+        errores.push(`Mascota ${idx + 1}: falta seleccionar el sexo.`);
+      }
+      if (!m.especie || m.especie === 'Seleccionar...') {
+        errores.push(`Mascota ${idx + 1}: falta seleccionar la especie.`);
+      }
+      if (
+        (!m.raza || m.raza === 'Seleccionar...') &&
+        m.raza !== 'Otro'
+      ) {
+        errores.push(`Mascota ${idx + 1}: falta seleccionar la raza.`);
+      }
+    });
+  
+    if (errores.length > 0) {
+      alert('Errores encontrados:\n\n' + errores.join('\n'));
+      return;
     }
   
-    if (textoAlerta.length > 0) {
-      alert(textoAlerta);
-      return; // No continúa si hay mascotas sin nombre
-    }
-  
-    // Si todo está bien, continúa con el guardado
-    //console.log(obtenerBaseURL() + '/mapa');
     setIsModalOpen(true);
     console.log('Todas las mascotas registradas:', mascotas);
   };
@@ -275,10 +294,10 @@ const RegistrarMascota = () => {
                 )}
 
               {[
-                ['nombre', 'Nombre*']
+                ['nombre', 'Nombre']
               ].map(([name, label]) => (
                 <div key={name} className="flex flex-col sm:flex-row sm:items-center sm:space-x-4">
-                  <label htmlFor={name} className="text-gray-700 font-semibold sm:w-40 top-0 relative">{label}</label>
+                  <label htmlFor={name} className="text-gray-700 font-semibold sm:w-40 top-0 relative">{label}<span className='text-red-500'>*</span></label>
                   <div className='flex flex-col w-full'>
                     <input
                       type={name.includes("fecha") ? "date" : "text"}
@@ -297,7 +316,7 @@ const RegistrarMascota = () => {
 
               {/* Sexo Dropdown */}
               <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-4">
-                <label className="text-gray-700 font-semibold sm:w-40">Sexo*</label>
+                <label className="text-gray-700 font-semibold sm:w-40">Sexo<span className='text-red-500'>*</span></label>
                 <div className='flex flex-col w-full'>
                   <select
                     name="sexo"
@@ -318,7 +337,7 @@ const RegistrarMascota = () => {
 
               {/* Especie Dropdown */}
               <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-4">
-                <label className="text-gray-700 font-semibold sm:w-40">Especie*</label>
+                <label className="text-gray-700 font-semibold sm:w-40">Especie<span className='text-red-500'>*</span></label>
                 <div className='flex flex-col w-full'>
                   <select
                     name="especie"
@@ -338,7 +357,7 @@ const RegistrarMascota = () => {
 
               {/* Raza Dropdown */}
               <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-4">
-                <label className="text-gray-700 font-semibold sm:w-40">Raza*</label>
+                <label className="text-gray-700 font-semibold sm:w-40">Raza<span className='text-red-500'>*</span></label>
                 <div className='flex flex-col w-full'>
                   <select
                     name="raza"
@@ -431,7 +450,7 @@ const RegistrarMascota = () => {
             {mascotas.length > 1 ? "Registrar todas las mascotas": "Registrar mascota"}
           </button>
         </div>
-        <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)}>
+        <Modal isOpen={isModalOpen} onClose={() => closeModalHandler()}>
           
           <h2 className="text-xl font-bold mb-4">
             {mascotas.length > 1 ? "Registro exitoso de mascotas!" : "Registro exitoso de mascota"}
@@ -440,18 +459,17 @@ const RegistrarMascota = () => {
             comprimido con todas las imágenes.
           </p>
           <p>No te preocupes, puedes descargar los QR en otro momento desde el listado de mascotas!</p>
-          {mascotas.map((mascota,index) =>(
-            <div key={index} className='py-2'>
+          {registroResponse.map((mascota) =>(
+            <div key={mascota.idMascota} className='py-2'>
               <div className='flex justify-between items-center'>
-                <p className='pl-4'>{mascota.nombre}</p>
-                <button className="px-4 py-2 bg-blue-400 text-white rounded-lg font-semibold hover:bg-green-600" >Descargar QR</button>
+                <p className='pl-4'>{mascota.nombreMascota}</p>
+                <button onClick={() =>descargarQR(mascota)} className="px-4 py-2 bg-blue-400 text-white rounded-lg font-semibold hover:bg-green-600" >Descargar QR</button>
               </div>
             </div>
-
           ))}
-          { mascotas.length > 1 ? (
-            <div className='flex justify-end pt-8'>
-              <button className="px-4 py-2 bg-green-500 text-white rounded-lg font-semibold hover:bg-green-600" >Descargar zip con QR</button>
+          { registroResponse.length > 1 ? (
+            <div className='flex justify-center pt-8'>
+              <button onClick={() => generarZipConQRs()} className="px-4 py-2 bg-green-500 text-white rounded-lg font-semibold hover:bg-green-600" >Descargar QR's en ZIP</button>
             </div>
             ) : null }
         </Modal>
