@@ -17,3 +17,20 @@ export const obtenerMascota = async (idMascota) => {
         throw error;
     }
 }
+
+export const registrarMascotas = async (mascotas) => {
+    try {
+        console.log('mascotas', mascotas);
+        const token = Cookies.get('token');
+        const response = await axios.post(`${API_URL}/api/pet/pet-registration`, mascotas, {
+        headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+        },
+        });
+        return response.data;
+    } catch (error) {
+        console.error('Error al guardar mascotas:', error);
+        throw error;
+    }
+}

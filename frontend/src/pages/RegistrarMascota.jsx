@@ -3,8 +3,13 @@ import { QRCodeCanvas } from 'qrcode.react';
 import QRCode from 'qrcode';
 import JSZip from 'jszip';
 import { saveAs } from 'file-saver';
-import { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+
+import { registrarMascotas } from '../services/mascota.service';
+
+import { eliminarLlavesVacias } from '../utils/funciones';
+
+import imageCompression from 'browser-image-compression';
 
 
 
@@ -149,17 +154,32 @@ const RegistrarMascota = () => {
     saveAs(contenidoZip, 'GPS-Papugrupo-QRS.zip');
   };
 
-  const handleImageUpload = (index, e) => {
+  const handleImageUpload = async (index, e) => {
     const file = e.target.files[0];
     if (file) {
-      const imageUrl = URL.createObjectURL(file);
-      handleChange(index, {
-        target: {
-          name: 'urlFoto',
-          value: imageUrl,
-          type: 'text'
-        }
-      });
+      const reader = new FileReader();
+
+      const options = {
+        maxSizeMB: 0.3,          // Tamaño máximo en MB (ajusta según sea necesario)
+        maxWidthOrHeight: 800, // Ancho o alto máximo (ajusta según sea necesario)
+        useWebWorker: true     // Usar Web Worker para procesamiento en segundo plano
+      };
+
+      const compressedFile = await imageCompression(file, options);
+  
+      // Cuando la imagen esté cargada, convertirla a base64
+      reader.onloadend = () => {
+        handleChange(index, {
+          target: {
+            name: 'urlFoto',
+            value: reader.result, // Aquí se obtiene el Base64
+            type: 'text'
+          }
+        });
+      };
+  
+      // Leer la imagen como Data URL (Base64)
+      reader.readAsDataURL(compressedFile);
     }
   };
 
@@ -185,7 +205,9 @@ const RegistrarMascota = () => {
     setTabActiva(Math.max(0, index - 1));
   };
 
-  const guardarMascotas = () => {
+  
+
+  const guardarMascotas = async () => {
     setIntentadoGuardar(true);
   
     const errores = [];
@@ -206,12 +228,29 @@ const RegistrarMascota = () => {
       ) {
         errores.push(`Mascota ${idx + 1}: falta seleccionar la raza.`);
       }
+      if (!m.fechaNacimiento.trim()) {
+        errores.push(`Mascota ${idx + 1}: falta la fecha de nacimiento.`);
+      }
     });
   
     if (errores.length > 0) {
       alert('Errores encontrados:\n\n' + errores.join('\n'));
       return;
     }
+    
+
+    const data = {
+      mascotas: mascotas
+    }
+
+    eliminarLlavesVacias(data);
+
+    const jsonMascotas = JSON.stringify(data);
+
+    const responseMascotas = await registrarMascotas(jsonMascotas);
+
+    console.log(JSON.stringify(responseMascotas))
+
   
     setIsModalOpen(true);
     console.log('Todas las mascotas registradas:', mascotas);
@@ -391,7 +430,7 @@ const RegistrarMascota = () => {
                 ['observaciones', 'Observaciones']
               ].map(([name, label]) => (
                 <div key={name} className="flex flex-col sm:flex-row sm:items-center sm:space-x-4">
-                  <label htmlFor={name} className="text-gray-700 font-semibold sm:w-40">{label}</label>
+                  <label htmlFor={name} className="text-gray-700 font-semibold sm:w-40">{label}{label == 'Fecha de Nacimiento' ? (<span className='text-red-500'>*</span>): null}</label>
                   <input
                     type={name.includes("fecha") ? "date" : "text"}
                     name={name}
@@ -435,8 +474,6 @@ const RegistrarMascota = () => {
                 />
               </div>
 
-              
-              
             </form>
           ) : null
         )}
