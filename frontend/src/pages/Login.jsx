@@ -1,15 +1,17 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import { loginUsuario } from '../services/usuario.service'; 
 
 const Login = () => {
   const [formData, setFormData] = useState({
-    email: '',
-    password: '',
+    correo: '',
+    contrasena: '',
   });
   const [emailError, setEmailError] = useState('');
   const [loginError, setLoginError] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const { login } = useAuth();
   const navigate = useNavigate();
 
@@ -27,7 +29,7 @@ const Login = () => {
     });
 
     // Validar correo en tiempo real
-    if (name === 'email') {
+    if (name === 'correo') {
       if (value && !validateEmail(value)) {
         setEmailError('Correo electrónico inválido');
       } else {
@@ -39,23 +41,47 @@ const Login = () => {
     if (loginError) setLoginError('');
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     // Validar campos antes de enviar
-    if (!formData.email || !validateEmail(formData.email)) {
+    if (!formData.correo || !validateEmail(formData.correo)) {
       setEmailError('Ingrese un correo válido');
       return;
     }
 
-    if (!formData.password) {
+    if (!formData.contrasena) {
       setLoginError('Ingrese una contraseña');
       return;
     }
 
-    // Autenticación simplificada (acepta cualquier combinación válida)
-    login(formData.email); // Guarda el email en el contexto/auth
-    navigate('/mapa'); // Redirige a la página protegida
+    try {
+      setIsSubmitting(true);
+      const response = await loginUsuario({
+        email: formData.correo,
+        contrasena: formData.contrasena
+      });
+      
+      if (response && response.token) {
+        localStorage.setItem('token', response.token);
+        
+
+        login(response.user || formData.correo);
+        
+
+        navigate('/mapa');
+      } else {
+        setLoginError('Respuesta del servidor inválida');
+      }
+    } catch (error) {
+      console.error('Error de inicio de sesión:', error);
+      setLoginError(
+        error.response?.data?.message || 
+        'Error al iniciar sesión. Verifique sus credenciales e intente nuevamente.'
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -73,13 +99,14 @@ const Login = () => {
           <label className="block text-darkNeutral mb-2">Correo Electrónico</label>
           <input
             type="email"
-            name="email"
-            value={formData.email}
+            name="correo"
+            value={formData.correo}
             onChange={handleChange}
             className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 ${
               emailError ? 'border-error focus:ring-error' : 'focus:ring-primary'
             }`}
             placeholder="ejemplo@correo.com"
+            disabled={isSubmitting}
           />
           {emailError && <p className="text-error text-sm mt-1">{emailError}</p>}
         </div>
@@ -89,16 +116,18 @@ const Login = () => {
           <div className="relative">
             <input
               type={showPassword ? 'text' : 'password'}
-              name="password"
-              value={formData.password}
+              name="contrasena"
+              value={formData.contrasena}
               onChange={handleChange}
               className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
               placeholder="••••••••"
+              disabled={isSubmitting}
             />
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
               className="absolute right-3 top-2.5 text-darkNeutral hover:text-dark"
+              disabled={isSubmitting}
             >
               {showPassword ? (
                 <span className="text-sm">Ocultar</span>
@@ -111,9 +140,12 @@ const Login = () => {
 
         <button
           type="submit"
-          className="w-full bg-dark text-white py-2 rounded-lg font-semibold hover:bg-dark transition duration-200 cursor-pointer"
+          className={`w-full ${
+            isSubmitting ? 'bg-gray-400' : 'bg-dark hover:bg-dark'
+          } text-white py-2 rounded-lg font-semibold transition duration-200 cursor-pointer`}
+          disabled={isSubmitting}
         >
-          Iniciar Sesión
+          {isSubmitting ? 'Iniciando sesión...' : 'Iniciar Sesión'}
         </button>
       </form>
     </div>
