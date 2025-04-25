@@ -8,7 +8,7 @@ export default function Sidebar({ isOpen, closeSidebar }) {
       }`}
     >
       {/* Cierre */}
-      <div className="flex justify-between items-center px-6 py-4 border-b border-[var(--color-secondary)]">
+      <div className="flex justify-between items-center px-6 py-4 border-b border-[var(--color-light)]">
         <h2 className="text-xl font-bold">Menú</h2>
         <button onClick={closeSidebar} className="text-black text-2xl cursor-pointer">
           &times;
@@ -17,10 +17,10 @@ export default function Sidebar({ isOpen, closeSidebar }) {
 
       {/* Navegación */}
       <nav className="p-6 flex flex-col gap-4">
-        <a href="/mapa" className="hover:text-[var(--color-dark)]">Mapa</a>
-        <a href="/registro-mascota" className="hover:text-[var(--color-dark)]">Registrar Mascota</a>
-        <a href="/registro" className="hover:text-[var(--color-dark)]">Registrar Usuario</a>
-        <a href="#" className="hover:text-[var(--color-dark)]">Salir</a>
+        <a href="/mapa" className="hover:text-[var(--color-secondary)]">Mapa</a>
+        <a href="/registro-mascota" className="hover:text-[var(--color-secondary)]">Registrar Mascota</a>
+        <a href="/registro" className="hover:text-[var(--color-secondary)]">Registrar Usuario</a>
+        <a href="#" className="hover:text-[var(--color-secondary)]">Salir</a>
       </nav>
     </aside>
   );
