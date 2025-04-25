@@ -1,11 +1,14 @@
-import { StrictMode } from 'react'
-import { createRoot } from 'react-dom/client'
-import './index.css'
-import RegistrarUsuario from './pages/RegistrarUsuario.jsx'
-import MapaMascota from './pages/MapaMascota.jsx'
+// main.jsx
+import { StrictMode } from 'react';
+import { createRoot } from 'react-dom/client';
+import './index.css';
+import { AuthProvider } from './context/AuthContext.jsx';
+import AppRoute from './routes/AppRoute.jsx';
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
-    <MapaMascota />
-  </StrictMode>,
-)
+    <AuthProvider>
+      <AppRoute />
+    </AuthProvider>
+  </StrictMode>
+);

@@ -243,7 +243,7 @@ const RegistrarUsuario = () => {
                     <div className="pt-4">
                         <button
                             type="submit"
-                            className="w-full bg-musgo text-black py-2 rounded-lg font-semibold hover:bg-musgo-2 transition duration-200"
+                            className="w-full bg-musgo text-black py-2 rounded-lg font-semibold hover:bg-musgo2 transition duration-200"
                         >
                             Registrar
                         </button>
