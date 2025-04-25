@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { QRCodeCanvas } from 'qrcode.react';
 import QRCode from 'qrcode';
 import JSZip from 'jszip';
@@ -76,14 +76,11 @@ const urlBaseQR = 'https://gps.bustamantedev.cl/registrar-ubicacion'
 
 const RegistrarMascota = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [mascotas, setMascotas] = useState([nuevaMascota()]);
+  const [mascotas, setMascotas] = useState([]);
   const [tabActiva, setTabActiva] = useState(0);
 
-  const navigate = useNavigate()
+  const navigate = useNavigate();
 
-  const [idMascotas, setIdMascotas] = useState();
-  const [textoQR, setTextoQR] = useState('');
-  const qrRef = useRef(null);
 
   const [intentadoGuardar, setIntentadoGuardar] = useState(false);
 
@@ -124,7 +121,7 @@ const RegistrarMascota = () => {
       // Crear link de descarga
       const link = document.createElement('a');
       link.href = url;
-      link.download = `qr-${mascota.nombreMascota}.png`;
+      link.download = `qr-${mascota.nombre}.png`;
       link.style.display = 'none';
       document.body.appendChild(link);
       link.click();
@@ -146,7 +143,7 @@ const RegistrarMascota = () => {
           const dataURL = await QRCode.toDataURL(urlBaseQR + "/" + response.idMascota);
           const res = await fetch(dataURL);
           const blob = await res.blob();
-          carpeta.file(`qr-${response.nombreMascota || 'vacio'}.png`, blob);
+          carpeta.file(`qr-${response.nombre || 'vacio'}.png`, blob);
         })
       );
   
@@ -184,7 +181,10 @@ const RegistrarMascota = () => {
   };
 
   const closeModalHandler =()=>{
-    navigate('/mapa')
+    //navigate('/mapa')
+    resetForm();
+    setIsModalOpen(false);
+    setIntentadoGuardar(false);
   }
 
   // Función para eliminar la imagen
@@ -204,8 +204,6 @@ const RegistrarMascota = () => {
     setMascotas(nuevasMascotas);
     setTabActiva(Math.max(0, index - 1));
   };
-
-  
 
   const guardarMascotas = async () => {
     setIntentadoGuardar(true);
@@ -251,10 +249,15 @@ const RegistrarMascota = () => {
 
     console.log(JSON.stringify(responseMascotas))
 
-  
-    setIsModalOpen(true);
-    console.log('Todas las mascotas registradas:', mascotas);
+    setRegistroResponse(responseMascotas.mascotas)
+    setIsModalOpen(true)
+
   };
+
+  const resetForm = () =>{
+    setMascotas([nuevaMascota()])
+  }
+
 
   return (
     <div className="min-h-screen w-full bg-[url('/assets/fondo.png')] flex flex-col items-center p-4 md:p-8">
@@ -301,7 +304,7 @@ const RegistrarMascota = () => {
                     <div className="flex items-center justify-center w-full mb-8">
                     <input
                         type="file"
-                        accept="image/*"
+                        accept="image/png"
                         onChange={(e) => handleImageUpload(index, e)}
                         className="hidden"
                         id={`file-upload-${index}`}
@@ -481,10 +484,10 @@ const RegistrarMascota = () => {
         {/* Guardar todas las mascotas */}
         <div className="pt-6">
           <button
-            onClick={guardarMascotas}
+            onClick={mascotas.length == 0 ? agregarMascota: guardarMascotas}
             className="w-full bg-musgo text-black py-2 rounded-lg font-semibold hover:bg-musgo2 transition duration-200"
           >
-            {mascotas.length > 1 ? "Registrar todas las mascotas": "Registrar mascota"}
+            {mascotas.length == 0 ? 'Agregar mascota': mascotas.length > 1 ? "Registrar todas las mascotas": "Registrar mascota"}
           </button>
         </div>
         <Modal isOpen={isModalOpen} onClose={() => closeModalHandler()}>
@@ -499,7 +502,7 @@ const RegistrarMascota = () => {
           {registroResponse.map((mascota) =>(
             <div key={mascota.idMascota} className='py-2'>
               <div className='flex justify-between items-center'>
-                <p className='pl-4'>{mascota.nombreMascota}</p>
+                <p className='pl-4'>{mascota.nombre}</p>
                 <button onClick={() =>descargarQR(mascota)} className="px-4 py-2 bg-blue-400 text-white rounded-lg font-semibold hover:bg-green-600" >Descargar QR</button>
               </div>
             </div>
