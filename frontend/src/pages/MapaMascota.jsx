@@ -1,11 +1,14 @@
 import React from 'react';
 import Map from '../components/MapComponent.jsx';
 import { obtenerMascota } from '../services/mascota.service.js';
-import { useEffect} from 'react';
+import { useEffect, useState} from 'react';
+import Header from "../components/Header";
+import Sidebar from "../components/Sidebar";
   
 
 const MapaMascota = () => {
   const idMascota = '9401620d-dbae-4d67-984e-5f47637ac4c6'; // Ejemplo de ID de mascota, puedes hacerlo dinámico si lo deseas
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   useEffect(() => {
     // Llamada para obtener los datos de la mascota
@@ -22,7 +25,8 @@ const MapaMascota = () => {
   }, [idMascota]);
   return (
     <div className="flex flex-col h-screen">
-
+      <Header toggleSidebar={() => setSidebarOpen(!sidebarOpen)} />
+      <Sidebar isOpen={sidebarOpen} closeSidebar={() => setSidebarOpen(false)} />
       
       <div className="flex flex-grow">
         {/* Mitad izquierda - puedes añadir contenido aquí */}
