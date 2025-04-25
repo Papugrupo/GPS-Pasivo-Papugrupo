@@ -17,9 +17,12 @@ const MapaMascota = () => {
         </div>
         
         {/* Mitad derecha - mapa */}
-        <div className="w-1/2 bg-gray-200">
-          <div className="h-full w-full">
+        <div className="w-1/2 h-full flex flex-col ">
+          <div className="h-fit w-full bg-gray-200 mt-10">
             <Map />
+          </div>
+          <div className="h-fit w-full mt-2 pl-5">
+            Ultimas Ubicaciones
           </div>
         </div>
       </div>

@@ -9,6 +9,12 @@ const MapComponent = () => {
   // Tu API key de MapTiler
   const apiKey = import.meta.env.VITE_MAPTILER_KEY; 
 
+  const puntos = [
+    { lng: -71.23025, lat: -35.00155 },
+    { lng: -71.25, lat: -35.01 },
+    { lng: -71.22, lat: -34.99 },
+  ];
+
   useEffect(() => {
     if (mapContainer.current && !map.current) {
       console.log("Inicializando mapa...");
@@ -20,7 +26,7 @@ const MapComponent = () => {
         map.current = new maplibregl.Map({
           container: mapContainer.current,
           style: styleUrl, // URL completa al archivo style.json con la API key
-          center: [-71.23025198746762, -35.00155919995224], // Nueva York como ejemplo
+          center: [-71.23025198746762, -35.00155919995224], 
           zoom: 9
         });
         
@@ -32,11 +38,17 @@ const MapComponent = () => {
         // Manejar eventos
         map.current.on('load', () => {
           console.log("Mapa cargado completamente");
-          new maplibregl.Marker({
-            color: "#FF0000" 
-          })
-            .setLngLat([-71.23025198746762, -35.00155919995224])
-            .addTo(map.current);
+    
+            puntos.forEach((punto) => {
+              // Crear un elemento HTML por punto
+              const marcador = document.createElement('div');
+              marcador.className = 'w-15 h-15 bg-no-repeat bg-contain cursor-pointer rounded-full border border-3 border-red-500';
+              marcador.style.backgroundImage = 'url(/assets/marcador.webp)';
+            
+              new maplibregl.Marker({ element: marcador })
+                .setLngLat([punto.lng, punto.lat])
+                .addTo(map.current);
+            });
         });
         
         map.current.on('error', (e) => {
