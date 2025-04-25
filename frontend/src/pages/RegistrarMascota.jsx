@@ -1,9 +1,9 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState } from 'react';
 import { QRCodeCanvas } from 'qrcode.react';
 import QRCode from 'qrcode';
 import JSZip from 'jszip';
 import { saveAs } from 'file-saver';
-import { useNavigate } from 'react-router-dom';
+//import { useNavigate } from 'react-router-dom';
 
 import { registrarMascotas } from '../services/mascota.service';
 
@@ -79,7 +79,7 @@ const RegistrarMascota = () => {
   const [mascotas, setMascotas] = useState([]);
   const [tabActiva, setTabActiva] = useState(0);
 
-  const navigate = useNavigate();
+  //const navigate = useNavigate();
 
 
   const [intentadoGuardar, setIntentadoGuardar] = useState(false);
