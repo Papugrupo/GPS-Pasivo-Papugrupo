@@ -1,8 +1,19 @@
-import React from "react";
+import React, { useState } from "react";
+import { useAuth } from "../context/AuthContext"; // Usamos el contexto que ya tienes
+import { useNavigate } from "react-router-dom";
 
 export default function Header({ toggleSidebar }) {
+  const { user, logout } = useAuth();
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logout();
+    navigate("/"); // o donde quieras redirigir después de cerrar sesión
+  };
+
   return (
-    <header className="bg-primary text-white flex items-center px-6 py-1 shadow-md h-16">
+    <header className="bg-primary text-white flex items-center px-6 py-1 shadow-md h-16 relative">
 
       {/* Botón hamburguesa */}
       <button
@@ -20,18 +31,41 @@ export default function Header({ toggleSidebar }) {
         </svg>
       </button>
 
-      {/* Logo con imagen */}
-      {/*
-      <div>
-        <img
-          src="" // Aquí debes colocar la ruta correcta de la imagen
-          alt="Logo"
-          className="h-18" // Ajusta el tamaño de la imagen según lo necesites
-        />
-      </div>*/}
-      
+      {/* Perfil de usuario */}
+      <div className="ml-auto relative">
+        <button
+          onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+          className="flex items-center gap-2 focus:outline-none"
+        >
+          <img
+            src="/assets/fotoPerfil.png" // Cambia esto por la ruta de tu imagen de perfil
+            alt="Perfil"
+            className="h-10 w-10 rounded-full"
+          />
+          <span className="text-black font-semibold">{user?.email || "Usuario"}</span>
+        </button>
 
-
+        {/* Dropdown */}
+        {isDropdownOpen && (
+          <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-2 z-50">
+            <button
+              onClick={() => {
+                setIsDropdownOpen(false);
+                navigate("/perfil"); // Redirigir a página de perfil
+              }}
+              className="block w-full text-left px-4 py-2 text-black hover:bg-gray-100"
+            >
+              Ver Perfil
+            </button>
+            <button
+              onClick={handleLogout}
+              className="block w-full text-left px-4 py-2 text-black hover:bg-gray-100"
+            >
+              Cerrar Sesión
+            </button>
+          </div>
+        )}
+      </div>
     </header>
   );
 }

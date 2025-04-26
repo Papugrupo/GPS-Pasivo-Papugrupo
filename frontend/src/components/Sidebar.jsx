@@ -1,5 +1,4 @@
 import React from "react";
-
 export default function Sidebar({ isOpen, closeSidebar }) {
   return (
     <aside
@@ -20,7 +19,6 @@ export default function Sidebar({ isOpen, closeSidebar }) {
         <a href="/mapa" className="hover:text-[var(--color-secondary)]">Mapa</a>
         <a href="/registro-mascota" className="hover:text-[var(--color-secondary)]">Registrar Mascota</a>
         <a href="/registro" className="hover:text-[var(--color-secondary)]">Registrar Usuario</a>
-        <a href="#" className="hover:text-[var(--color-secondary)]">Salir</a>
       </nav>
     </aside>
   );
