@@ -9,7 +9,7 @@ import Landing from '../pages/Landing.jsx';
 import RegistrarMascota from '../pages/RegistrarMascota.jsx';
 import Layout from '../components/Layout';
 import ReportarMascota from '../pages/ReportarMascota.jsx';
-
+import Perfil from '../pages/Perfil.jsx';
 export default function AppRoute() {
   return (
     <Router>
@@ -20,6 +20,7 @@ export default function AppRoute() {
         <Route path="/" element={<Landing />} />
         <Route path="/registro-mascota" element={<RegistrarMascota/>} />
         <Route path="/reportar-mascota" element={<ReportarMascota/>}/>
+        <Route path="/perfil" element={<Perfil/>}/>
 
         {/* Rutas protegidas */}
         <Route element={<PrivateRoute><Layout /></PrivateRoute>}>
@@ -44,6 +45,14 @@ export default function AppRoute() {
             element={
               <PrivateRoute>
                 <MapaMascota />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/perfil"
+            element={
+              <PrivateRoute>
+                <Perfil />
               </PrivateRoute>
             }
           />
