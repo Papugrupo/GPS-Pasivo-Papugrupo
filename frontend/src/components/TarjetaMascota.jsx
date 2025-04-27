@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { obtenerMascota } from '../services/mascota.service.js';
+import ModalQR from './ModalQR';
 
 const TarjetaMascota = ({ idMascota }) => {
   const [desplegado, setDesplegado] = useState(false);
     const [mascota, setMascota] = useState('');
     const imagenMascota = mascota.urlFoto || '/assets/mascotaPorDefecto.png'; // Imagen por defecto si no tiene una imagen
-  
+    const [mostrarModalQR, setMostrarModalQR] = useState(false); // Estado para mostrar el ModalQR
+
   const toggleDesplegado = () => {
     setDesplegado(!desplegado);
   };
@@ -35,6 +37,11 @@ const TarjetaMascota = ({ idMascota }) => {
     return edad;
   };
 
+    // Función para manejar el cierre del modal
+    const cerrarModalQR = () => {
+      setMostrarModalQR(false);
+    };  
+
 
   return (
     <div className="border rounded-lg p-2 mb-2 bg-blue-100">
@@ -60,7 +67,17 @@ const TarjetaMascota = ({ idMascota }) => {
               <p>Lat: {mascota.latitud || 'N/A'}</p>
               <p>Long: {mascota.longitud || 'N/A'}</p>
             </div>
+                        {/* Botón para abrir el ModalQR, a la derecha */}
+                        <button
+              className="ml-4 p-2 bg-blue-500 text-white rounded-full hover:bg-blue-600 focus:outline-none"
+              onClick={() => setMostrarModalQR(true)} // Al hacer clic, mostramos el ModalQR
+            >
+              Ver QR
+            </button>
           </div>
+
+          {/* ModalQR */}
+          {mostrarModalQR && <ModalQR idMascota={idMascota} closeModal={cerrarModalQR} />}
         </div>
       )}
     </div>
