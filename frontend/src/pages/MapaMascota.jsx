@@ -3,6 +3,7 @@ import MapMascotaComponent from '../components/MapMascotaComponent.jsx';
 import { obtenerMascota, obtenerListadoMascotas  } from '../services/mascota.service.js';
 import { useEffect} from 'react';
 import TablaUbicacionMascota from '../components/TablaUbicacionMascota.jsx';
+import ModalMascota from '../components/ModalMascota.jsx';
   
 const datosDeEjemplo = [
   {
@@ -32,7 +33,8 @@ const MapaMascota = () => {
   
   const [nombreMascota, setNombreMascota] = useState('');
   const[imagenMascota,setImagenMascota] = useState('')
-  const [listaMascotas, setListaMascotas] = useState([]); // <<< NUEVO
+  const [listaMascotas, setListaMascotas] = useState([]);
+  const [mascotaSeleccionada, setMascotaSeleccionada] = useState('');
 
   useEffect(() => {
     // Llamada para obtener los datos de la mascota
@@ -61,6 +63,15 @@ const MapaMascota = () => {
     fetchMascota();
     fetchListadoMascotas();
   }, [idMascota]);
+
+  const abrirModal = (mascota) => {
+    setMascotaSeleccionada(mascota); // Establecer la mascota seleccionada
+  };
+
+  const cerrarModal = () => {
+    setMascotaSeleccionada(null); // Cerrar el modal
+  };
+
   return (
     <div className="flex flex-col h-screen">
       <div className="flex flex-grow">
@@ -71,11 +82,15 @@ const MapaMascota = () => {
             <p>lista de mascotas.</p>
             <ul className="list-disc pl-5">
               {listaMascotas.map((mascota) => (
-                <li key={mascota.id} className="mb-2">
+                <li
+                  key={mascota.idMascota}
+                  className="mb-2 cursor-pointer text-blue-500"
+                  onClick={() => abrirModal(mascota.idMascota)} // Abrir el modal al hacer clic
+                >
                   {mascota.nombre}
                 </li>
               ))}
-            </ul>  
+            </ul>
           </div>
         </div>
         {/* Mitad derecha - mapa */}
@@ -89,6 +104,9 @@ const MapaMascota = () => {
           </div>
         </div>
       </div>
+       {/* Modal de la mascota seleccionada */}
+       {mascotaSeleccionada && <ModalMascota idMascota={mascotaSeleccionada} closeModal={cerrarModal} />}
+
     </div>
   );
 };

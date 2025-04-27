@@ -6,7 +6,7 @@ const token = Cookies.get('token');
 
 export const obtenerMascota = async (idMascota) => {
     try {
-        const response = await axios.get(`${API_URL}/api/pet/mascota/${idMascota}`, {
+        const response = await axios.get(`${API_URL}/api/pet/pet-info/${idMascota}`, {
             headers: {        
                 'Authorization': `Bearer ${token}`,                                                                                           
             },
