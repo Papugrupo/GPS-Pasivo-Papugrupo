@@ -28,6 +28,7 @@ export const loginUsuario = async (usuario) => {
         });
         const token = response.data.token;
         Cookies.set('token', token, { expires: 1 });
+        console.log(token)
         return response.data;
     } catch (error) {
         console.error('Error al iniciar sesión:', error);
