@@ -6,7 +6,7 @@ const token = Cookies.get('token');
 
 export const obtenerMascota = async (idMascota) => {
     try {
-        const response = await axios.get(`${API_URL}/api/pet/${idMascota}`, {
+        const response = await axios.get(`${API_URL}/api/pet/mascota/${idMascota}`, {
             headers: {        
                 'Authorization': `Bearer ${token}`,                                                                                           
             },
@@ -34,3 +34,20 @@ export const registrarMascotas = async (mascotas) => {
         throw error;
     }
 }
+
+export const obtenerListadoMascotas = async () => {
+    try {
+      const token = localStorage.getItem('token');
+  
+      const response = await axios.get(`${API_URL}/api/pet/mis-mascotas`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+  
+      return response.data.mascotas;
+    } catch (error) {
+      console.error('Error al obtener el listado de mascotas:', error);
+      throw error;
+    }
+  };

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import MapMascotaComponent from '../components/MapMascotaComponent.jsx';
-import { obtenerMascota } from '../services/mascota.service.js';
+import { obtenerMascota, obtenerListadoMascotas  } from '../services/mascota.service.js';
 import { useEffect} from 'react';
 import TablaUbicacionMascota from '../components/TablaUbicacionMascota.jsx';
   
@@ -32,6 +32,7 @@ const MapaMascota = () => {
   
   const [nombreMascota, setNombreMascota] = useState('');
   const[imagenMascota,setImagenMascota] = useState('')
+  const [listaMascotas, setListaMascotas] = useState([]); // <<< NUEVO
 
   useEffect(() => {
     // Llamada para obtener los datos de la mascota
@@ -46,7 +47,19 @@ const MapaMascota = () => {
       }
     };
 
+    // Obtener LISTADO de mascotas
+    const fetchListadoMascotas = async () => {
+      console.log('obteniendo listado de mascotas')
+      try {
+        const data = await obtenerListadoMascotas();
+        setListaMascotas(data);
+      } catch (err) {
+        console.error('Error al obtener el listado de mascotas', err);
+      }
+    };
+
     fetchMascota();
+    fetchListadoMascotas();
   }, [idMascota]);
   return (
     <div className="flex flex-col h-screen">
@@ -55,7 +68,14 @@ const MapaMascota = () => {
         <div className="w-1/2 p-4 bg-gray-100">
           <div className="bg-white p-4 rounded-lg shadow h-full">
             <h2 className="text-xl font-semibold mb-4">Mascotas</h2>
-            <p>lista de mascotas.</p>  
+            <p>lista de mascotas.</p>
+            <ul className="list-disc pl-5">
+              {listaMascotas.map((mascota) => (
+                <li key={mascota.id} className="mb-2">
+                  {mascota.nombre}
+                </li>
+              ))}
+            </ul>  
           </div>
         </div>
         {/* Mitad derecha - mapa */}
