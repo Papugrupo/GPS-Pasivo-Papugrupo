@@ -50,4 +50,26 @@ export const obtenerListadoMascotas = async () => {
       console.error('Error al obtener el listado de mascotas:', error);
       throw error;
     }
-  };
+}
+
+export const reportarMascota = async (idMascota, latitud, longitud) => {
+    try {
+        const response = await axios.post(
+            `${API_URL}/api/pet/registrar-ubicacion`,
+            {
+                idMascota,
+                latitud,
+                longitud
+            },
+            {
+                headers: {        
+                    'Authorization': `Bearer ${token}`,
+                }
+            }
+        );
+        return response.data;
+    } catch (error) {
+        console.error('Error al reportar ubicación de la mascota:', error);
+        throw error;
+    }
+}
