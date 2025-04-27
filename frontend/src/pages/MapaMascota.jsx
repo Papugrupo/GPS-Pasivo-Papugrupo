@@ -33,6 +33,9 @@ const MapaMascota = () => {
   const [nombreMascota, setNombreMascota] = useState('');
   const [imagenMascota, setImagenMascota] = useState('');
   const [listaMascotas, setListaMascotas] = useState([]);
+  const [puntosActivos, setPuntosActivos] = useState(datosDeEjemplo);
+  const [mostrarTodosPuntos, setMostrarTodosPuntos] = useState(true);
+  const [zoom, setZoom] = useState(15);
 
   useEffect(() => {
     const fetchMascota = async () => {
@@ -59,6 +62,26 @@ const MapaMascota = () => {
     fetchListadoMascotas();
   }, [idMascota]);
 
+  const handleMostrarUltimaUbicacion = () => {
+    if (puntosActivos.length > 0) {
+      setPuntosActivos([puntosActivos[puntosActivos.length - 1]]);
+      setMostrarTodosPuntos(false);
+    }
+  };
+
+  const handleMostrarTodasUbicaciones = () => {
+    setPuntosActivos(datosDeEjemplo);
+    setMostrarTodosPuntos(true);
+  };
+
+  const handleZoomIn = () => {
+    setZoom(prev => Math.min(prev + 1, 18));
+  };
+
+  const handleZoomOut = () => {
+    setZoom(prev => Math.max(prev - 1, 10));
+  };
+
   return (
     <div className="flex flex-col h-screen">
       <div className="flex flex-grow">
@@ -75,14 +98,62 @@ const MapaMascota = () => {
           </div>
         </div>
 
-        {/* Mitad derecha - mapa y tabla */}
+        {/* Mitad derecha - mapa y controles */}
         <div className="w-1/2 h-full flex flex-col">
+          {/* Contenedor del mapa */}
           <div className="h-fit w-full mt-10 px-5">
-            <MapMascotaComponent imagen={imagenMascota} puntos={datosDeEjemplo} />
+            <MapMascotaComponent 
+              imagen={imagenMascota} 
+              puntos={puntosActivos} 
+              zoom={zoom}
+            />
           </div>
-          <div className="h-fit w-full mt-2 px-10 max-h-[20vh]">
+
+          {/* Controles debajo del mapa */}
+          <div className="w-full px-5 mt-4 flex justify-between items-center">
+            {/* Botones de control de ubicaciones */}
+            <div className="flex space-x-2">
+              <button
+                onClick={handleMostrarUltimaUbicacion}
+                className={`px-4 py-2 rounded-md shadow ${!mostrarTodosPuntos ? 'bg-blue-500 text-white' : 'bg-white hover:bg-gray-100'}`}
+              >
+                Última ubicación
+              </button>
+              <button
+                onClick={handleMostrarTodasUbicaciones}
+                className={`px-4 py-2 rounded-md shadow ${mostrarTodosPuntos ? 'bg-blue-500 text-white' : 'bg-white hover:bg-gray-100'}`}
+              >
+                Todas las ubicaciones
+              </button>
+            </div>
+            
+            {/* Controles de zoom */}
+            <div className="flex space-x-2">
+              <button 
+                onClick={handleZoomOut}
+                className="bg-white p-2 rounded-md shadow hover:bg-gray-100"
+                title="Alejar"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M5 10a1 1 0 011-1h8a1 1 0 110 2H6a1 1 0 01-1-1z" clipRule="evenodd" />
+                </svg>
+              </button>
+              <button 
+                onClick={handleZoomIn}
+                className="bg-white p-2 rounded-md shadow hover:bg-gray-100"
+                title="Acercar"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clipRule="evenodd" />
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          {/* Tabla de ubicaciones */}
+          <div className="h-fit w-full mt-4 px-10 max-h-[20vh]">
             <h1 className="text-2xl font-bold mb-4">Ubicaciones de {nombreMascota}</h1>
-            <TablaUbicacionMascota datos={datosDeEjemplo} />
+            <TablaUbicacionMascota datos={puntosActivos} />
           </div>
         </div>
       </div>
