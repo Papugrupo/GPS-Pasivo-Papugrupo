@@ -1,9 +1,11 @@
 import React, { useState,useEffect } from 'react';
 import { obtenerMascota,reportarMascota } from '../services/mascota.service.js';
+import { useParams } from 'react-router-dom';
 
 const ReportarMascota = () => {
 
-    const idMascota = 'ab5eaf9d-76a4-4d22-8396-aee77111f6e6';
+    const params = useParams();
+    const idMascota = params.uuid ?? '';
 
     const [formData, setFormData] = useState({
         latitud: '0.0000',
@@ -119,7 +121,7 @@ const ReportarMascota = () => {
                 
                 <div className="flex justify-center mb-4">
                     <img 
-                        src={`data:image/png;base64,${formData.imagenBase64}`} 
+                        src={`${formData.imagenBase64}`} 
                         alt="Imagen de mascota" 
                         className="w-fit h-[15vh] object-contain rounded-2xl"
                     />

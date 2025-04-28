@@ -55,7 +55,7 @@ export const obtenerListadoMascotas = async () => {
 export const reportarMascota = async (idMascota, latitud, longitud) => {
     try {
         const response = await axios.post(
-            `${API_URL}/api/pet/registrar-ubicacion`,
+            `${API_URL}/api/qr/registrar-ubicacion`,
             {
                 idMascota,
                 latitud,

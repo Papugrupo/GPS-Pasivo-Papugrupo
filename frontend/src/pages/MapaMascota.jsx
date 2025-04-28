@@ -30,7 +30,7 @@ const datosDeEjemplo = [
 ];
 
 const MapaMascota = () => {
-  const idMascota = 'ab5eaf9d-76a4-4d22-8396-aee77111f6e6';
+  const idMascota = '5cdfb9a7-17d7-460c-93d6-0d34e2d81cff';
   
   const [nombreMascota, setNombreMascota] = useState('');
   const[imagenMascota,setImagenMascota] = useState('')
