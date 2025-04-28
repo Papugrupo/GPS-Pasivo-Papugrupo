@@ -24,13 +24,10 @@ const ModalQR = ({ idMascota, closeModal }) => {
 
   useEffect(() => {
     const generarQR = async () => {
-        console.log('generando QR');
-        console.log('mascota', mascota);
       if (mascota) {
         try {
           setCargandoQR(true);
-          console.log('mascota', mascota);
-          const dataURL = await QRCode.toDataURL(urlBaseQR+"/"+idMascota);
+          const dataURL = await QRCode.toDataURL(`${urlBaseQR}/${mascota.idMascota}`);
           setImagenQR(dataURL);
         } catch (err) {
           console.error('Error al generar el QR:', err);
@@ -66,11 +63,20 @@ const ModalQR = ({ idMascota, closeModal }) => {
     return edad;
   };
 
+  const descargarQR = () => {
+    if (imagenQR) {
+      const link = document.createElement('a');
+      link.href = imagenQR;
+      link.download = `QR_${mascota.nombre}.png`;
+      link.click();
+    }
+  };
+
   return (
     <div className="fixed inset-0 flex justify-center items-center z-50">
       <div
         ref={modalRef}
-        className="bg-white p-4 sm:p-8 rounded-lg w-11/12 sm:w-1/2 md:w-2/3 lg:w-1/3 flex relative border shadow-lg"
+        className="bg-white p-6 rounded-lg w-11/12 sm:w-1/2 md:w-1/2 lg:w-1/3 flex flex-col items-center relative border shadow-lg space-y-6"
         style={{ maxWidth: '90%' }}
       >
         <button
@@ -80,38 +86,44 @@ const ModalQR = ({ idMascota, closeModal }) => {
           X
         </button>
 
-        {/* Imagen del QR o "cargando..." */}
-        <div className="w-full sm:w-1/3 p-4 flex justify-center items-center">
+        {/* Imagen del QR y botón descargar */}
+        <div className="flex flex-col items-center">
           {cargandoQR ? (
             <p className="text-gray-500">Cargando QR...</p>
           ) : (
-            <img
-              src={imagenQR}
-              alt={`QR de ${mascota.nombre}`}
-              className="w-full h-48 object-contain rounded-lg"
-            />
+            <>
+              <img
+                src={imagenQR}
+                alt={`QR de ${mascota.nombre}`}
+                className="w-60 h-60 object-contain rounded-lg mb-4"
+              />
+              <button
+                onClick={descargarQR}
+                className="bg-primary text-black font-semibold py-2 px-4 rounded cursor-pointer hover:bg-[var(--color-secondary)] transition duration-200"
+              >
+                Descargar QR
+              </button>
+            </>
           )}
         </div>
 
         {/* Datos de la mascota */}
-        <div className="w-full sm:w-2/3 p-4 flex flex-col space-y-4">
-          {mascota && (
-            <div className="text-center">
+        {mascota && (
+          <div className="text-center w-full">
+            <h2 className="text-2xl font-semibold mb-4">Información de la Mascota</h2>
             <div className="flex flex-col space-y-3">
-                <h2 className="text-2xl font-semibold mb-4">Información de Mascota</h2>
-                <div className="p-3 bg-primary rounded-lg text-black">
+              <div className="p-3 bg-primary rounded-lg text-black">
                 <strong>Nombre:</strong> {mascota.nombre}
-                </div>
-                <div className="p-3 bg-primary rounded-lg text-black">
+              </div>
+              <div className="p-3 bg-primary rounded-lg text-black">
                 <strong>Raza:</strong> {mascota.raza}
-                </div>
-                <div className="p-3 bg-primary rounded-lg text-black">
+              </div>
+              <div className="p-3 bg-primary rounded-lg text-black">
                 <strong>Edad:</strong> {calcularEdad(mascota.fechaNacimiento)} años
-                </div>
+              </div>
             </div>
-            </div>
-          )}
-        </div>
+          </div>
+        )}
       </div>
     </div>
   );

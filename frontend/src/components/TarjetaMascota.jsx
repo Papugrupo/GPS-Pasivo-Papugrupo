@@ -1,12 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { obtenerMascota } from '../services/mascota.service.js';
 import ModalQR from './ModalQR';
+import ModalMascota from './ModalMascota.jsx'; // Asegúrate de importar el componente ModalMascota
 
 const TarjetaMascota = ({ idMascota }) => {
   const [desplegado, setDesplegado] = useState(false);
     const [mascota, setMascota] = useState('');
     const imagenMascota = mascota.urlFoto || '/assets/mascotaPorDefecto.png'; // Imagen por defecto si no tiene una imagen
     const [mostrarModalQR, setMostrarModalQR] = useState(false); // Estado para mostrar el ModalQR
+  const [mascotaSeleccionada, setMascotaSeleccionada] = useState(''); // Estado para la mascota seleccionada
+
 
   const toggleDesplegado = () => {
     setDesplegado(!desplegado);
@@ -37,6 +40,15 @@ const TarjetaMascota = ({ idMascota }) => {
     return edad;
   };
 
+  const abrirModal = () => {
+    setMascotaSeleccionada(idMascota); // Asignar el id de la mascota seleccionada}
+  }
+
+    const cerrarModal = () => {
+      setMascotaSeleccionada(''); // Limpiar el id de la mascota seleccionada
+    }
+
+
     // Función para manejar el cierre del modal
     const cerrarModalQR = () => {
       setMostrarModalQR(false);
@@ -57,8 +69,8 @@ const TarjetaMascota = ({ idMascota }) => {
 
       {desplegado && (
         <div className="mt-2 p-2 bg-white rounded shadow">
-          <div className="flex items-center space-x-4">   
-              <img src={imagenMascota} alt="Foto mascota" className="w-20 h-20 object-cover rounded" />
+          <div className="flex flex-col sm:flex-row items-center sm:space-x-4 space-y-2 sm:space-y-0">   
+            <img src={imagenMascota} alt="Foto mascota" className="w-20 h-20 object-cover rounded" />
             <div className="text-sm">
               <p><strong>Nombre:</strong> {mascota.nombre || 'N/A'}</p>
               <p><strong>Raza:</strong> {mascota.raza || 'N/A'}</p>
@@ -67,17 +79,27 @@ const TarjetaMascota = ({ idMascota }) => {
               <p>Lat: {mascota.latitud || 'N/A'}</p>
               <p>Long: {mascota.longitud || 'N/A'}</p>
             </div>
-                        {/* Botón para abrir el ModalQR, a la derecha */}
-                        <button
-              className="ml-4 p-2 bg-blue-500 text-white rounded-full hover:bg-blue-600 focus:outline-none"
-              onClick={() => setMostrarModalQR(true)} // Al hacer clic, mostramos el ModalQR
+
+            <button
+              className="p-2 bg-blue-500 text-white rounded-full hover:bg-blue-600 focus:outline-none"
+              onClick={() => setMostrarModalQR(true)}
             >
               Ver QR
             </button>
+
+            <button
+              className="p-2 bg-blue-500 text-white rounded-full hover:bg-blue-600 focus:outline-none"
+              onClick={abrirModal}
+            >
+              Ver más detalles
+            </button>
           </div>
+
 
           {/* ModalQR */}
           {mostrarModalQR && <ModalQR idMascota={idMascota} closeModal={cerrarModalQR} />}
+          {/* Modal de la mascota seleccionada */}
+          {mascotaSeleccionada && <ModalMascota idMascota={mascotaSeleccionada} closeModal={cerrarModal} />}
         </div>
       )}
     </div>

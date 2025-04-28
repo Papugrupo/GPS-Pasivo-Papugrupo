@@ -91,6 +91,12 @@ const ModalMascota = ({ idMascota, closeModal }) => {
               <div className="p-3 bg-primary rounded-lg text-black">
                 <strong>Fecha de Nacimiento:</strong> {mascota.fechaNacimiento}
               </div>
+              <div className="p-3 bg-primary rounded-lg text-black">
+                <strong>Color:</strong> {mascota.color}
+              </div>
+              <div className="p-3 bg-primary rounded-lg text-black">
+                <strong>Tamaño:</strong> {mascota.tamano}
+              </div>
             </div>
           </div>
         </div>
