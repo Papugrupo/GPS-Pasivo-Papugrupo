@@ -4,16 +4,16 @@
 :root {
   --color-primary: #DAE8FB;
   /* Azul claro (Base) */
-  --color-secondary: #AFCBFA;
-  /* Azul más saturado (para hovers o elementos secundarios) */
-  --color-dark: #508EF5;
-  /* Azul vibrante (para sombreado o bordes) */
-  --color-error: #FBE8DA;
-  /* Naranja pálido (para advertencias o errores) */
-  --color-light: #F4F9FB;
-  /* Color suave para fondos o elementos neutros */
-  --color-darkNeutral: #1F2A44;
+  --color-secondary: #4fd1c5;
+  /* Verde claro (para acentos o elementos secundarios) */
+  --color-dark: #0d7f75;
   /* Azul oscuro (para texto o detalles) */
+  --color-error: #9d101a;
+  /* Rojo (para errores o advertencias) */
+  --color-light: #f4f9f9;
+  /* Color suave para fondos o elementos neutros */
+  --color-darkNeutral: #1c2b2b;
+  /* Color oscuro neutro para texto o detalles */
   --color-musgo: #d4e6d4;
   --color-musgo2: #A9D0A9;
 }
