@@ -3,10 +3,13 @@ import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import Login from '../pages/Login.jsx';
 import RegistrarUsuario from '../pages/RegistrarUsuario';
 import MapaMascota from '../pages/MapaMascota';
-import PruebaQR from '../pages/PruebaQr';
+import PruebaQR from '../pages/PruebaQR';
 import { PrivateRoute } from '../routes/PrivateRoute';
 import Landing from '../pages/Landing.jsx';
-
+import RegistrarMascota from '../pages/RegistrarMascota.jsx';
+import Layout from '../components/Layout';
+import ReportarMascota from '../pages/ReportarMascota.jsx';
+import Perfil from '../pages/Perfil.jsx';
 export default function AppRoute() {
   return (
     <Router>
@@ -15,24 +18,45 @@ export default function AppRoute() {
         <Route path="/registro" element={<RegistrarUsuario />} />
         <Route path="/pruebaQR" element={<PruebaQR />} />
         <Route path="/" element={<Landing />} />
+        <Route path="/registro-mascota" element={<RegistrarMascota/>} />
+        <Route path="/reportar-mascota" element={<ReportarMascota/>}/>
+        <Route path="/perfil" element={<Perfil/>}/>
 
         {/* Rutas protegidas */}
-        <Route
-          path="/mapa"
-          element={
-            <PrivateRoute>
-              <MapaMascota />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/"
-          element={
-            <PrivateRoute>
-              <MapaMascota />
-            </PrivateRoute>
-          }
-        />
+        <Route element={<PrivateRoute><Layout /></PrivateRoute>}>
+          <Route
+            path="/mapa"
+            element={
+              <PrivateRoute>
+                <MapaMascota />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/registro-mascota"
+            element={
+              <PrivateRoute>
+                <RegistrarMascota />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/"
+            element={
+              <PrivateRoute>
+                <MapaMascota />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/perfil"
+            element={
+              <PrivateRoute>
+                <Perfil />
+              </PrivateRoute>
+            }
+          />
+        </Route>
       </Routes>
     </Router>
   );
