@@ -1,5 +1,5 @@
 import React, { useState,useEffect } from 'react';
-import { obtenerMascota,reportarMascota } from '../services/mascota.service.js';
+import { obtenerMascotaQR,reportarMascota } from '../services/mascota.service.js';
 import { useParams } from 'react-router-dom';
 
 const ReportarMascota = () => {
@@ -22,7 +22,7 @@ const ReportarMascota = () => {
 
     const fetchMascota = async () => {
         try {
-            const data = await obtenerMascota(idMascota);
+            const data = await obtenerMascotaQR(idMascota);
             console.log(data);
 
             // Calcular edad

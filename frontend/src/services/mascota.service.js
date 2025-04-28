@@ -18,6 +18,17 @@ export const obtenerMascota = async (idMascota) => {
     }
 }
 
+export const obtenerMascotaQR = async (idMascota) => {
+    try {
+        const response = await axios.get(`${API_URL}/api/qr/pet/${idMascota}`
+        );
+        return response.data;
+    } catch (error) {
+        console.error('Error al obtener la mascota:', error);
+        throw error;
+    }
+}
+
 export const registrarMascotas = async (mascotas) => {
     try {
         console.log('mascotas', mascotas);
