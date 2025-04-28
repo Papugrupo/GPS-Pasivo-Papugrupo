@@ -51,7 +51,7 @@ const ReportarMascota = () => {
             setIsSubmitting(true);
             // Aquí iría el request
            // console.log(formData, idMascota)
-            const response = await reportarMascota(idMascota,Number(formData.latitud),Number(formData.longitud));
+            await reportarMascota(idMascota,Number(formData.latitud),Number(formData.longitud));
             setSubmitSuccess('Ubicación registrada exitosamente');
         } catch (error) {
             console.error('Error al reportar:', error);
