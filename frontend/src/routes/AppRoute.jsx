@@ -7,7 +7,9 @@ import PruebaQR from '../pages/PruebaQR';
 import { PrivateRoute } from '../routes/PrivateRoute';
 import Landing from '../pages/Landing.jsx';
 import RegistrarMascota from '../pages/RegistrarMascota.jsx';
-
+import Layout from '../components/Layout';
+import RegistrarUbicacion from '../pages/ReportarMascota.jsx';
+import Perfil from '../pages/Perfil.jsx';
 export default function AppRoute() {
   return (
     <Router>
@@ -17,32 +19,44 @@ export default function AppRoute() {
         <Route path="/pruebaQR" element={<PruebaQR />} />
         <Route path="/" element={<Landing />} />
         <Route path="/registro-mascota" element={<RegistrarMascota/>} />
+        <Route path="/registrar-ubicacion/:uuid" element={<RegistrarUbicacion />} />
+        <Route path="/perfil" element={<Perfil/>}/>
 
         {/* Rutas protegidas */}
-        <Route
-          path="/mapa"
-          element={
-            <PrivateRoute>
-              <MapaMascota />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/registro-mascota"
-          element={
-            <PrivateRoute>
-              <RegistrarMascota />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/"
-          element={
-            <PrivateRoute>
-              <MapaMascota />
-            </PrivateRoute>
-          }
-        />
+        <Route element={<PrivateRoute><Layout /></PrivateRoute>}>
+          <Route
+            path="/mapa"
+            element={
+              <PrivateRoute>
+                <MapaMascota />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/registro-mascota"
+            element={
+              <PrivateRoute>
+                <RegistrarMascota />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/"
+            element={
+              <PrivateRoute>
+                <MapaMascota />
+              </PrivateRoute>
+            }
+          />
+          <Route
+            path="/perfil"
+            element={
+              <PrivateRoute>
+                <Perfil />
+              </PrivateRoute>
+            }
+          />
+        </Route>
       </Routes>
     </Router>
   );

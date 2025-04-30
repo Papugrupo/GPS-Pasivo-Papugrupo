@@ -1,10 +1,15 @@
-import React, { useState, useRef } from 'react';
+import React, { useState } from 'react';
 import { QRCodeCanvas } from 'qrcode.react';
 import QRCode from 'qrcode';
 import JSZip from 'jszip';
 import { saveAs } from 'file-saver';
-import { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+//import { useNavigate } from 'react-router-dom';
+
+import { registrarMascotas } from '../services/mascota.service';
+
+import { eliminarLlavesVacias } from '../utils/funciones';
+
+import imageCompression from 'browser-image-compression';
 
 
 
@@ -71,14 +76,11 @@ const urlBaseQR = 'https://gps.bustamantedev.cl/registrar-ubicacion'
 
 const RegistrarMascota = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [mascotas, setMascotas] = useState([nuevaMascota()]);
+  const [mascotas, setMascotas] = useState([]);
   const [tabActiva, setTabActiva] = useState(0);
 
-  const navigate = useNavigate()
+  //const navigate = useNavigate();
 
-  const [idMascotas, setIdMascotas] = useState();
-  const [textoQR, setTextoQR] = useState('');
-  const qrRef = useRef(null);
 
   const [intentadoGuardar, setIntentadoGuardar] = useState(false);
 
@@ -119,7 +121,7 @@ const RegistrarMascota = () => {
       // Crear link de descarga
       const link = document.createElement('a');
       link.href = url;
-      link.download = `qr-${mascota.nombreMascota}.png`;
+      link.download = `qr-${mascota.nombre}.png`;
       link.style.display = 'none';
       document.body.appendChild(link);
       link.click();
@@ -141,7 +143,7 @@ const RegistrarMascota = () => {
           const dataURL = await QRCode.toDataURL(urlBaseQR + "/" + response.idMascota);
           const res = await fetch(dataURL);
           const blob = await res.blob();
-          carpeta.file(`qr-${response.nombreMascota || 'vacio'}.png`, blob);
+          carpeta.file(`qr-${response.nombre || 'vacio'}.png`, blob);
         })
       );
   
@@ -149,22 +151,40 @@ const RegistrarMascota = () => {
     saveAs(contenidoZip, 'GPS-Papugrupo-QRS.zip');
   };
 
-  const handleImageUpload = (index, e) => {
+  const handleImageUpload = async (index, e) => {
     const file = e.target.files[0];
     if (file) {
-      const imageUrl = URL.createObjectURL(file);
-      handleChange(index, {
-        target: {
-          name: 'urlFoto',
-          value: imageUrl,
-          type: 'text'
-        }
-      });
+      const reader = new FileReader();
+
+      const options = {
+        maxSizeMB: 0.3,          // Tamaño máximo en MB (ajusta según sea necesario)
+        maxWidthOrHeight: 800, // Ancho o alto máximo (ajusta según sea necesario)
+        useWebWorker: true     // Usar Web Worker para procesamiento en segundo plano
+      };
+
+      const compressedFile = await imageCompression(file, options);
+  
+      // Cuando la imagen esté cargada, convertirla a base64
+      reader.onloadend = () => {
+        handleChange(index, {
+          target: {
+            name: 'urlFoto',
+            value: reader.result, // Aquí se obtiene el Base64
+            type: 'text'
+          }
+        });
+      };
+  
+      // Leer la imagen como Data URL (Base64)
+      reader.readAsDataURL(compressedFile);
     }
   };
 
   const closeModalHandler =()=>{
-    navigate('/mapa')
+    //navigate('/mapa')
+    resetForm();
+    setIsModalOpen(false);
+    setIntentadoGuardar(false);
   }
 
   // Función para eliminar la imagen
@@ -185,7 +205,7 @@ const RegistrarMascota = () => {
     setTabActiva(Math.max(0, index - 1));
   };
 
-  const guardarMascotas = () => {
+  const guardarMascotas = async () => {
     setIntentadoGuardar(true);
   
     const errores = [];
@@ -206,16 +226,38 @@ const RegistrarMascota = () => {
       ) {
         errores.push(`Mascota ${idx + 1}: falta seleccionar la raza.`);
       }
+      if (!m.fechaNacimiento.trim()) {
+        errores.push(`Mascota ${idx + 1}: falta la fecha de nacimiento.`);
+      }
     });
   
     if (errores.length > 0) {
       alert('Errores encontrados:\n\n' + errores.join('\n'));
       return;
     }
-  
-    setIsModalOpen(true);
-    console.log('Todas las mascotas registradas:', mascotas);
+    
+
+    const data = {
+      mascotas: mascotas
+    }
+
+    eliminarLlavesVacias(data);
+
+    const jsonMascotas = JSON.stringify(data);
+
+    const responseMascotas = await registrarMascotas(jsonMascotas);
+
+    console.log(JSON.stringify(responseMascotas))
+
+    setRegistroResponse(responseMascotas.mascotas)
+    setIsModalOpen(true)
+
   };
+
+  const resetForm = () =>{
+    setMascotas([nuevaMascota()])
+  }
+
 
   return (
     <div className="min-h-screen w-full bg-[url('/assets/fondo.png')] flex flex-col items-center p-4 md:p-8">
@@ -262,7 +304,7 @@ const RegistrarMascota = () => {
                     <div className="flex items-center justify-center w-full mb-8">
                     <input
                         type="file"
-                        accept="image/*"
+                        accept="image/png"
                         onChange={(e) => handleImageUpload(index, e)}
                         className="hidden"
                         id={`file-upload-${index}`}
@@ -391,7 +433,7 @@ const RegistrarMascota = () => {
                 ['observaciones', 'Observaciones']
               ].map(([name, label]) => (
                 <div key={name} className="flex flex-col sm:flex-row sm:items-center sm:space-x-4">
-                  <label htmlFor={name} className="text-gray-700 font-semibold sm:w-40">{label}</label>
+                  <label htmlFor={name} className="text-gray-700 font-semibold sm:w-40">{label}{label == 'Fecha de Nacimiento' ? (<span className='text-red-500'>*</span>): null}</label>
                   <input
                     type={name.includes("fecha") ? "date" : "text"}
                     name={name}
@@ -435,8 +477,6 @@ const RegistrarMascota = () => {
                 />
               </div>
 
-              
-              
             </form>
           ) : null
         )}
@@ -444,10 +484,10 @@ const RegistrarMascota = () => {
         {/* Guardar todas las mascotas */}
         <div className="pt-6">
           <button
-            onClick={guardarMascotas}
+            onClick={mascotas.length == 0 ? agregarMascota: guardarMascotas}
             className="w-full bg-musgo text-black py-2 rounded-lg font-semibold hover:bg-musgo2 transition duration-200"
           >
-            {mascotas.length > 1 ? "Registrar todas las mascotas": "Registrar mascota"}
+            {mascotas.length == 0 ? 'Agregar mascota': mascotas.length > 1 ? "Registrar todas las mascotas": "Registrar mascota"}
           </button>
         </div>
         <Modal isOpen={isModalOpen} onClose={() => closeModalHandler()}>
@@ -462,7 +502,7 @@ const RegistrarMascota = () => {
           {registroResponse.map((mascota) =>(
             <div key={mascota.idMascota} className='py-2'>
               <div className='flex justify-between items-center'>
-                <p className='pl-4'>{mascota.nombreMascota}</p>
+                <p className='pl-4'>{mascota.nombre}</p>
                 <button onClick={() =>descargarQR(mascota)} className="px-4 py-2 bg-blue-400 text-white rounded-lg font-semibold hover:bg-green-600" >Descargar QR</button>
               </div>
             </div>

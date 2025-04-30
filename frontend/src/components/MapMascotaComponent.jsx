@@ -2,18 +2,12 @@ import React, { useEffect, useRef } from 'react';
 import maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 
-const MapComponent = () => {
+const MapMascotaComponent = ({ imagen , puntos }) => {
   const mapContainer = useRef(null);
   const map = useRef(null);
   
   // Tu API key de MapTiler
   const apiKey = import.meta.env.VITE_MAPTILER_KEY; 
-
-  const puntos = [
-    { lng: -71.23025, lat: -35.00155 },
-    { lng: -71.25, lat: -35.01 },
-    { lng: -71.22, lat: -34.99 },
-  ];
 
   useEffect(() => {
     if (mapContainer.current && !map.current) {
@@ -39,16 +33,35 @@ const MapComponent = () => {
         map.current.on('load', () => {
           console.log("Mapa cargado completamente");
     
-            puntos.forEach((punto) => {
-              // Crear un elemento HTML por punto
-              const marcador = document.createElement('div');
-              marcador.className = 'w-15 h-15 bg-no-repeat bg-contain cursor-pointer rounded-full border border-3 border-red-500';
-              marcador.style.backgroundImage = 'url(/assets/marcador.webp)';
-            
-              new maplibregl.Marker({ element: marcador })
-                .setLngLat([punto.lng, punto.lat])
-                .addTo(map.current);
-            });
+          puntos.forEach((punto) => {
+            // 1. Crear contenedor del marcador
+            const contenedor = document.createElement('div');
+            contenedor.style.display = 'flex';
+            contenedor.style.flexDirection = 'column';
+            contenedor.style.alignItems = 'center';
+            contenedor.style.textAlign = 'center';
+        
+            // 2. Crear marcador (imagen)
+            const marcador = document.createElement('div');
+            marcador.className = 'w-10 h-10 bg-no-repeat bg-contain cursor-pointer rounded-full border-4 border-red-500';
+            marcador.style.backgroundImage = `url(${imagen})`;
+            marcador.style.backgroundSize = 'cover';
+            marcador.style.backgroundPosition = 'center';
+        
+            // 3. Crear texto debajo (fecha y hora)
+            const texto = document.createElement('div');
+            texto.className = 'text-xs bg-white px-1 rounded mt-1 shadow-md'; 
+            texto.innerText = `${punto.dia}/${punto.mes} ${punto.hora}:${punto.minuto}`;
+        
+            // 4. Meter el marcador y el texto en el contenedor
+            contenedor.appendChild(marcador);
+            contenedor.appendChild(texto);
+        
+            // 5. Crear el marcador en el mapa
+            new maplibregl.Marker({ element: contenedor })
+              .setLngLat([punto.longitud, punto.latitud])
+              .addTo(map.current);
+          });
         });
         
         map.current.on('error', (e) => {
@@ -66,7 +79,7 @@ const MapComponent = () => {
         map.current = null;
       }
     };
-  }, []);
+  }, [imagen, puntos]);
 
   return (
     <div style={{width: '100%', height: '500px', position: 'relative'}}>
@@ -86,4 +99,4 @@ const MapComponent = () => {
   );
 };
 
-export default MapComponent;
+export default MapMascotaComponent;
