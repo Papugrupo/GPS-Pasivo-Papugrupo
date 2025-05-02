@@ -1,9 +1,11 @@
 import React, { useState,useEffect } from 'react';
-import { obtenerMascota } from '../services/mascota.service.js';
+import { obtenerMascotaQR,reportarMascota } from '../services/mascota.service.js';
+import { useParams } from 'react-router-dom';
 
 const ReportarMascota = () => {
 
-    const idMascota = 'ab5eaf9d-76a4-4d22-8396-aee77111f6e6';
+    const params = useParams();
+    const idMascota = params.uuid ?? '';
 
     const [formData, setFormData] = useState({
         latitud: '0.0000',
@@ -18,6 +20,28 @@ const ReportarMascota = () => {
     const [submitError, setSubmitError] = useState('');
     const [submitSuccess, setSubmitSuccess] = useState('');
 
+    const fetchMascota = async () => {
+        try {
+            const data = await obtenerMascotaQR(idMascota);
+            console.log(data);
+
+            // Calcular edad
+            const edadCalculada = calcularEdad(data.fechaNacimiento);
+
+            // Actualizar datos en formData
+            setFormData(prev => ({
+                ...prev, // mantiene latitud y longitud actual
+                nombreMascota: data.nombre || '',
+                raza: data.raza || '',
+                edad: edadCalculada,
+                imagenBase64: data.urlFoto || '',
+            }));
+
+        } catch (err) {
+            console.error('Error al obtener la mascota:', err);
+        }
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         setSubmitError('');
@@ -26,7 +50,8 @@ const ReportarMascota = () => {
         try {
             setIsSubmitting(true);
             // Aquí iría el request
-            console.log(formData, idMascota)
+           // console.log(formData, idMascota)
+            await reportarMascota(idMascota,Number(formData.latitud),Number(formData.longitud));
             setSubmitSuccess('Ubicación registrada exitosamente');
         } catch (error) {
             console.error('Error al reportar:', error);
@@ -37,64 +62,41 @@ const ReportarMascota = () => {
     };
 
     useEffect(() => {
-        const fetchMascota = async () => {
-            try {
-                const data = await obtenerMascota(idMascota);
-                console.log(data);
-
-                // Calcular edad
-                const edadCalculada = calcularEdad(data.fechaNacimiento);
-
-                // Actualizar datos en formData
-                setFormData({
-                    latitud: '0.000',
-                    longitud: '0.000',
-                    nombreMascota: data.nombre || '',
-                    raza: data.raza || '',
-                    edad: edadCalculada,
-                    imagenBase64: data.urlFoto || '',
-                });
-
-            } catch (err) {
-                console.error('Error al obtener la mascota:', err);
+        const pedirUbicacionYFetchMascota = async () => {
+            if (!navigator.geolocation) {
+                console.error('Geolocalización no soportada');
+                fetchMascota(); // igual cargamos la mascota
+                return;
             }
+    
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    const { latitude, longitude } = position.coords;
+                    console.log('Latitud:', latitude, 'Longitud:', longitude);
+    
+                    setFormData(prev => ({
+                        ...prev,
+                        latitud: latitude.toString(),
+                        longitud: longitude.toString(),
+                    }));
+    
+                    fetchMascota(); // Después de setear ubicación, cargamos mascota
+                },
+                (error) => {
+                    console.error('Error de ubicación:', error);
+                    fetchMascota(); // Aunque falle la ubicación, cargamos mascota
+                },
+                {
+                    enableHighAccuracy: true,
+                    timeout: 10000,
+                    maximumAge: 0
+                }
+            );
         };
-
-        fetchMascota();
+    
+        pedirUbicacionYFetchMascota();
     }, [idMascota]);
-
-    useEffect(() => {
-        const pedirUbicacion = () => {
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(
-                    (position) => {
-                        // Si el usuario acepta, aquí tienes la ubicación
-                        const { latitude, longitude } = position.coords;
-                        console.log('Latitud:', latitude, 'Longitud:', longitude);
     
-                        setFormData(prev => ({
-                            ...prev,
-                            latitud: latitude.toString(),
-                            longitud: longitude.toString(),
-                        }));
-                    },
-                    (error) => {
-                        console.error('Error al obtener la ubicación:', error);
-                        // Puedes mostrar un mensaje de error si quieres
-                    },
-                    {
-                        enableHighAccuracy: true, // Usa el GPS si está disponible
-                        timeout: 10000, // Tiempo máximo de espera
-                        maximumAge: 0 // No usar caché
-                    }
-                );
-            } else {
-                console.error('Geolocalización no es soportada por este navegador.');
-            }
-        };
-    
-        pedirUbicacion();
-    }, []);
     
 
     const calcularEdad = (fechaNacimiento) => {
@@ -119,7 +121,7 @@ const ReportarMascota = () => {
                 
                 <div className="flex justify-center mb-4">
                     <img 
-                        src={`data:image/png;base64,${formData.imagenBase64}`} 
+                        src={`${formData.imagenBase64}`} 
                         alt="Imagen de mascota" 
                         className="w-fit h-[15vh] object-contain rounded-2xl"
                     />

@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import MapMascotaComponent from '../components/MapMascotaComponent.jsx';
 import { obtenerMascota, obtenerListadoMascotas } from '../services/mascota.service.js';
 import TablaUbicacionMascota from '../components/TablaUbicacionMascota.jsx';
+import ModalMascota from '../components/ModalMascota.jsx';
+  
 import TarjetaMascota from '../components/TarjetaMascota.jsx';
 
 const datosDeEjemplo = [
@@ -28,11 +30,12 @@ const datosDeEjemplo = [
 ];
 
 const MapaMascota = () => {
-  const idMascota = 'ab5eaf9d-76a4-4d22-8396-aee77111f6e6';
+  const idMascota = '5cdfb9a7-17d7-460c-93d6-0d34e2d81cff';
   
   const [nombreMascota, setNombreMascota] = useState('');
-  const [imagenMascota, setImagenMascota] = useState('');
+  const[imagenMascota,setImagenMascota] = useState('')
   const [listaMascotas, setListaMascotas] = useState([]);
+  const [mascotaSeleccionada, setMascotaSeleccionada] = useState('');
   const [puntosActivos, setPuntosActivos] = useState(datosDeEjemplo);
   const [mostrarTodosPuntos, setMostrarTodosPuntos] = useState(true);
   const [zoom, setZoom] = useState(15);
@@ -61,6 +64,10 @@ const MapaMascota = () => {
     fetchMascota();
     fetchListadoMascotas();
   }, [idMascota]);
+
+  const cerrarModal = () => {
+    setMascotaSeleccionada(null); // Cerrar el modal
+  };
 
   const handleMostrarUltimaUbicacion = () => {
     if (puntosActivos.length > 0) {
@@ -92,7 +99,7 @@ const MapaMascota = () => {
             <p>Lista de mascotas:</p>
             <div className="mt-4">
               {listaMascotas.map((mascota) => (
-                <TarjetaMascota key={mascota.id} mascota={mascota} />
+                <TarjetaMascota key={mascota} idMascota={mascota.idMascota} />
               ))}
             </div>
           </div>
@@ -157,6 +164,9 @@ const MapaMascota = () => {
           </div>
         </div>
       </div>
+       {/* Modal de la mascota seleccionada */}
+       {mascotaSeleccionada && <ModalMascota idMascota={mascotaSeleccionada} closeModal={cerrarModal} />}
+
     </div>
   );
 };
