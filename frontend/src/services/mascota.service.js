@@ -1,16 +1,21 @@
-import axios from 'axios';
-import Cookies from 'js-cookie';
-
-const API_URL = import.meta.env.VITE_API_BACKEND;
-const token = Cookies.get('token');
+import axiosAuth from '../api/axiosAuth'; // Para las peticiones que necesiten token
+import axiosPublic from '../api/axiosPublic'; // Para las peticiones que no necesiten token
 
 export const obtenerMascota = async (idMascota) => {
     try {
-        const response = await axios.get(`${API_URL}/api/pet/pet-info/${idMascota}`, {
-            headers: {        
-                'Authorization': `Bearer ${token}`,                                                                                           
-            },
-        });
+      const response = await axiosAuth.get(`/api/pet/pet-info/${idMascota}`);
+      return response.data;
+    } catch (error) {
+      console.error('Error al obtener la mascota:', error);
+      throw error;
+    }
+  };
+
+export const obtenerMascotaQR = async (idMascota) => {
+    
+    try {
+        const response = await axiosPublic.get(`/api/qr/pet/${idMascota}`
+        );
         return response.data;
     } catch (error) {
         console.error('Error al obtener la mascota:', error);
@@ -20,14 +25,7 @@ export const obtenerMascota = async (idMascota) => {
 
 export const registrarMascotas = async (mascotas) => {
     try {
-        console.log('mascotas', mascotas);
-        const token = Cookies.get('token');
-        const response = await axios.post(`${API_URL}/api/pet/pet-registration`, mascotas, {
-        headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json',
-        },
-        });
+        const response = await axiosAuth.post(`/api/pet/pet-registration`, mascotas);
         return response.data;
     } catch (error) {
         console.error('Error al guardar mascotas:', error);
@@ -37,13 +35,7 @@ export const registrarMascotas = async (mascotas) => {
 
 export const obtenerListadoMascotas = async () => {
     try {
-      const token = localStorage.getItem('token');
-  
-      const response = await axios.get(`${API_URL}/api/pet/mis-mascotas`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const response = await axiosAuth.get(`/api/pet/mis-mascotas`);
   
       return response.data.mascotas;
     } catch (error) {
@@ -54,17 +46,12 @@ export const obtenerListadoMascotas = async () => {
 
 export const reportarMascota = async (idMascota, latitud, longitud) => {
     try {
-        const response = await axios.post(
-            `${API_URL}/api/pet/registrar-ubicacion`,
+        const response = await axiosAuth.post(
+            `/api/qr/registrar-ubicacion`,
             {
                 idMascota,
                 latitud,
                 longitud
-            },
-            {
-                headers: {        
-                    'Authorization': `Bearer ${token}`,
-                }
             }
         );
         return response.data;
