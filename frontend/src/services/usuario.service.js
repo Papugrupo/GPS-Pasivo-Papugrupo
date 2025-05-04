@@ -39,7 +39,7 @@ export const obtenerUsuario = async (email) => {
 export const actualizarUsuario = async (usuario) => {
 
     try {
-        const response = await axiosAuth.put(`api/user/${usuario.email}`, usuario);
+        const response = await axiosAuth.put(`api/user/${usuario.correo}`, usuario);
         return response.data;
     } catch (error) {
         console.error('Error al actualizar usuario:', error);

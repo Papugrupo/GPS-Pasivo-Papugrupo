@@ -143,7 +143,7 @@ const Perfil = () => {
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-primary text-white rounded hover:bg-primary-dark"
+                  className="px-4 py-2 bg-[#e0ecfc] text-gray-800 rounded hover:bg-[#c6d8f5] transition-colors font-medium"
                 >
                   Guardar cambios
                 </button>
@@ -192,7 +192,6 @@ const Perfil = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {mascotas.map((mascota) => (
                 <div key={mascota.idMascota} className="bg-white p-4 rounded shadow-md">
-                  <img src={mascota.urlFoto} alt={mascota.nombre} className="w-full h-32 object-cover rounded mb-2" />
                   <h3 className="text-lg font-semibold">{mascota.nombre}</h3>
                   <p className="text-gray-600">Especie: {mascota.especie}</p>
                   <p className="text-gray-600">Raza: {mascota.raza}</p>
