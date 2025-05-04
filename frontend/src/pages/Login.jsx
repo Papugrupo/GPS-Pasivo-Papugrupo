@@ -86,6 +86,11 @@ const Login = () => {
     }
   };
 
+  
+  const handleRegisterRedirect = () => {
+    navigate('/registro');
+  };
+
   return (
     <div>
       <h1 className="text-2xl font-bold text-darkNeutral text-center mb-6">Iniciar Sesión</h1>
@@ -150,6 +155,15 @@ const Login = () => {
           {isSubmitting ? 'Iniciando sesión...' : 'Iniciar Sesión'}
         </button>
       </form>
+      <div className="mt-4 text-center">
+        <button
+          onClick={handleRegisterRedirect}
+          className="text-darkNeutral hover:text-[var(--color-dark)] font-medium cursor-pointer"
+        >
+          ¿No tienes cuenta? Regístrate aquí
+        </button>
+      </div>
+
     </div>
   );
 };
