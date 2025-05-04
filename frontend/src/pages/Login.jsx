@@ -65,8 +65,10 @@ const Login = () => {
       if (response && response.token) {
         localStorage.setItem('token', response.token);
         
-
-        login(response.user || formData.correo);
+        // Guardar el email también
+        localStorage.setItem('userEmail', formData.correo);
+        
+        login({ email: formData.correo }); // Pasar el objeto user con email
         
 
         navigate('/mapa');
