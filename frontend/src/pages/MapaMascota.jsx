@@ -5,6 +5,36 @@ import TablaUbicacionMascota from '../components/TablaUbicacionMascota.jsx';
 import ModalMascota from '../components/ModalMascota.jsx';
 import TarjetaMascota from '../components/TarjetaMascota.jsx';
 
+// Helper function to transform location data
+const transformarUbicacion = (ubicacion) => {
+  if (!ubicacion || !ubicacion.fecha) {
+    console.warn("Ubicación inválida o sin fecha:", ubicacion);
+    return null; // O retornar un objeto con valores por defecto/N/A
+  }
+  try {
+    const fechaObj = new Date(ubicacion.fecha);
+    if (isNaN(fechaObj.getTime())) {
+      console.warn("Fecha inválida en ubicación:", ubicacion.fecha);
+      return null; // O manejar como prefieras
+    }
+    return {
+      idUbicacion: ubicacion.idUbicacion, // Mantener ID si existe
+      latitud: ubicacion.latitud,
+      longitud: ubicacion.longitud,
+      dia: fechaObj.getDate(),
+      mes: fechaObj.getMonth() + 1, // getMonth() es 0-indexado
+      anio: fechaObj.getFullYear(),
+      hora: fechaObj.getHours(),
+      minuto: fechaObj.getMinutes(),
+      segundo: fechaObj.getSeconds(),
+    };
+  } catch (error) {
+    console.error("Error transformando ubicación:", error, ubicacion);
+    return null;
+  }
+};
+
+
 const MapaMascota = () => {
   const [selectedMascotaId, setSelectedMascotaId] = useState(null); 
   const [nombreMascota, setNombreMascota] = useState('');
@@ -77,20 +107,24 @@ const MapaMascota = () => {
     setVistaActiva('ultima'); 
 
     try {
-      // Obtener la respuesta completa del servicio
       const responseData = await obtenerUbicacionesMascota(selectedMascotaId);
-      console.log("Respuesta completa del servicio:", responseData); // Log para verificar estructura
+      console.log("Respuesta completa del servicio:", responseData); 
 
-      // Acceder al array dentro de la propiedad 'ubicaciones'
-      // Asegurarse que responseData exista y tenga la propiedad 'ubicaciones'
-      const ubicaciones = responseData && Array.isArray(responseData.ubicaciones) ? responseData.ubicaciones : [];
+      const ubicacionesOriginales = responseData && Array.isArray(responseData.ubicaciones) ? responseData.ubicaciones : [];
 
-      if (ubicaciones.length > 0) {
-        const ultimaUbicacion = ubicaciones[ubicaciones.length - 1];
-        console.log("Última ubicación obtenida:", ultimaUbicacion);
-        setPuntosActivos([ultimaUbicacion]); 
+      if (ubicacionesOriginales.length > 0) {
+        const ultimaUbicacionOriginal = ubicacionesOriginales[ubicacionesOriginales.length - 1];
+        // Transformar la última ubicación al formato esperado por la tabla
+        const ultimaUbicacionTransformada = transformarUbicacion(ultimaUbicacionOriginal);
+        
+        if (ultimaUbicacionTransformada) {
+          console.log("Última ubicación transformada:", ultimaUbicacionTransformada);
+          setPuntosActivos([ultimaUbicacionTransformada]); // Poner la ubicación transformada en el estado
+        } else {
+          console.log("No se pudo transformar la última ubicación.");
+          setPuntosActivos([]);
+        }
       } else {
-        // Este log ahora debería ser correcto si el array está vacío
         console.log("No se encontraron ubicaciones (array vacío o propiedad no encontrada)."); 
         setPuntosActivos([]); 
       }
@@ -115,19 +149,22 @@ const MapaMascota = () => {
     setVistaActiva('todas'); 
 
     try {
-      // Obtener la respuesta completa del servicio
       const responseData = await obtenerUbicacionesMascota(selectedMascotaId);
-      console.log("Respuesta completa del servicio:", responseData); // Log para verificar estructura
+      console.log("Respuesta completa del servicio:", responseData); 
 
-      // Acceder al array dentro de la propiedad 'ubicaciones'
-      // Asegurarse que responseData exista y tenga la propiedad 'ubicaciones'
-      const ubicaciones = responseData && Array.isArray(responseData.ubicaciones) ? responseData.ubicaciones : [];
+      const ubicacionesOriginales = responseData && Array.isArray(responseData.ubicaciones) ? responseData.ubicaciones : [];
       
-      console.log("Todas las ubicaciones obtenidas (del array):", ubicaciones);
-      setPuntosActivos(ubicaciones); // Mostrar todas las ubicaciones del array
+      // Transformar TODAS las ubicaciones al formato esperado por la tabla
+      const ubicacionesTransformadas = ubicacionesOriginales
+        .map(transformarUbicacion) // Aplica la función de transformación a cada elemento
+        .filter(u => u !== null); // Filtra cualquier resultado nulo de la transformación
 
-      // Opcional: Log si el array está vacío
-      if (ubicaciones.length === 0) {
+      console.log("Todas las ubicaciones transformadas:", ubicacionesTransformadas);
+      setPuntosActivos(ubicacionesTransformadas); // Poner las ubicaciones transformadas en el estado
+
+      if (ubicacionesTransformadas.length === 0 && ubicacionesOriginales.length > 0) {
+         console.warn("Se recibieron ubicaciones pero no se pudieron transformar.");
+      } else if (ubicacionesOriginales.length === 0) {
          console.log("No se encontraron ubicaciones (array vacío o propiedad no encontrada).");
       }
 
@@ -173,8 +210,10 @@ const MapaMascota = () => {
           <div className="w-1/2 h-full flex flex-col">
             {/* Contenedor del mapa */}
             <div className="h-fit w-full mt-10 px-5">
+              {/* MapMascotaComponent probablemente espera latitud/longitud, así que no necesita la transformación */}
               <MapMascotaComponent 
                 imagen={imagenMascota} 
+                // Pasar los puntos transformados (que aún tienen lat/lon)
                 puntos={puntosActivos} 
                 zoom={zoom}
                 key={selectedMascotaId} 
@@ -227,6 +266,7 @@ const MapaMascota = () => {
             {/* Tabla de ubicaciones */}
             <div className="h-fit w-full mt-4 px-10 max-h-[20vh]">
               <h1 className="text-2xl font-bold mb-4">Ubicaciones de {nombreMascota || 'mascota seleccionada'}</h1>
+              {/* Pasar los puntos YA TRANSFORMADOS a la tabla */}
               <TablaUbicacionMascota datos={puntosActivos} /> 
             </div>
           </div>
