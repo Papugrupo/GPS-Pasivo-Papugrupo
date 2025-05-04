@@ -18,42 +18,32 @@ export default function AppRoute() {
         <Route path="/registro" element={<RegistrarUsuario />} />
         <Route path="/pruebaQR" element={<PruebaQR />} />
         <Route path="/" element={<Landing />} />
-        <Route path="/registro-mascota" element={<RegistrarMascota/>} />
         <Route path="/registrar-ubicacion/:uuid" element={<RegistrarUbicacion />} />
-        <Route path="/perfil" element={<Perfil/>}/>
 
         {/* Rutas protegidas */}
         <Route element={<PrivateRoute><Layout /></PrivateRoute>}>
           <Route
             path="/mapa"
             element={
-              <PrivateRoute>
                 <MapaMascota />
-              </PrivateRoute>
             }
           />
           <Route
             path="/registro-mascota"
             element={
-              <PrivateRoute>
                 <RegistrarMascota />
-              </PrivateRoute>
             }
           />
           <Route
             path="/"
             element={
-              <PrivateRoute>
                 <MapaMascota />
-              </PrivateRoute>
             }
           />
           <Route
             path="/perfil"
             element={
-              <PrivateRoute>
                 <Perfil />
-              </PrivateRoute>
             }
           />
         </Route>

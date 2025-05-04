@@ -65,8 +65,10 @@ const Login = () => {
       if (response && response.token) {
         localStorage.setItem('token', response.token);
         
-
-        login(response.user || formData.correo);
+        // Guardar el email también
+        localStorage.setItem('userEmail', formData.correo);
+        
+        login({ email: formData.correo }); // Pasar el objeto user con email
         
 
         navigate('/mapa');
@@ -82,6 +84,11 @@ const Login = () => {
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  
+  const handleRegisterRedirect = () => {
+    navigate('/registro');
   };
 
   return (
@@ -148,6 +155,15 @@ const Login = () => {
           {isSubmitting ? 'Iniciando sesión...' : 'Iniciar Sesión'}
         </button>
       </form>
+      <div className="mt-4 text-center">
+        <button
+          onClick={handleRegisterRedirect}
+          className="text-darkNeutral hover:text-[var(--color-dark)] font-medium cursor-pointer"
+        >
+          ¿No tienes cuenta? Regístrate aquí
+        </button>
+      </div>
+
     </div>
   );
 };
