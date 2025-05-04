@@ -205,78 +205,79 @@ const MapaMascota = () => {
               </div>
             </div>
           </div>
+
+          {/* Mitad derecha - mapa y controles */}
+          {selectedMascotaId ? ( 
+            <div className="md:w-3/5 md:h-[92%] flex flex-col mt-4 h-[60%]">
+              {/* Contenedor del mapa */}
+              <div className="h-[50%] w-full px-5">
+                {/* MapMascotaComponent probablemente espera latitud/longitud, así que no necesita la transformación */}
+                <MapMascotaComponent 
+                  imagen={imagenMascota} 
+                  // Pasar los puntos transformados (que aún tienen lat/lon)
+                  puntos={puntosActivos} 
+                  zoom={zoom}
+                  key={selectedMascotaId} 
+                />
+              </div>
+
+              {/* Controles debajo del mapa */}
+              <div className="w-full px-5 mt-4 flex justify-between items-center h-fit ">
+                {/* Botones de control de ubicaciones */}
+                <div className="flex space-x-2">
+                  <button
+                    onClick={handleMostrarUltimaUbicacion}
+                    disabled={!selectedMascotaId || cargandoUltima || cargandoTodas} 
+                    className={`px-4 py-2 rounded-md shadow ${vistaActiva === 'ultima' ? 'bg-blue-500 text-white' : 'bg-white hover:bg-gray-100'} ${(!selectedMascotaId || cargandoUltima || cargandoTodas) ? 'opacity-50 cursor-not-allowed' : ''}`}
+                  >
+                    {cargandoUltima ? 'Cargando...' : 'Última ubicación'} 
+                  </button>
+                  <button
+                    onClick={handleMostrarTodasUbicaciones}
+                    disabled={!selectedMascotaId || cargandoUltima || cargandoTodas} 
+                    className={`px-4 py-2 rounded-md shadow ${vistaActiva === 'todas' ? 'bg-blue-500 text-white' : 'bg-white hover:bg-gray-100'} ${(!selectedMascotaId || cargandoUltima || cargandoTodas) ? 'opacity-50 cursor-not-allowed' : ''}`}
+                  >
+                    {cargandoTodas ? 'Cargando...' : 'Todas las ubicaciones'}
+                  </button>
+                </div>
+                
+                {/* Controles de zoom */}
+                <div className="flex space-x-2">
+                  <button 
+                    onClick={handleZoomOut}
+                    className="bg-white p-2 rounded-md shadow hover:bg-gray-100"
+                    title="Alejar"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                      <path fillRule="evenodd" d="M5 10a1 1 0 011-1h8a1 1 0 110 2H6a1 1 0 01-1-1z" clipRule="evenodd" />
+                    </svg>
+                  </button>
+                  <button 
+                    onClick={handleZoomIn}
+                    className="bg-white p-2 rounded-md shadow hover:bg-gray-100"
+                    title="Acercar"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                      <path fillRule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clipRule="evenodd" />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+
+              {/* Tabla de ubicaciones */}
+              <div className="h-fit w-full mt-4 px-5 md:px-10 max-h-[20vh]">
+                <h1 className="text-2xl font-bold mb-4">Ubicaciones de {nombreMascota || 'mascota seleccionada'}</h1>
+                {/* Pasar los puntos YA TRANSFORMADOS a la tabla */}
+                <TablaUbicacionMascota datos={puntosActivos} /> 
+              </div>
+            </div>
+            
+          ) : (
+            <div className="w-1/2 h-full flex items-center justify-center text-gray-500">
+              <p>Selecciona una mascota de la lista.</p> 
+            </div>
+          )}
         </div>
-
-        {/* Mitad derecha - mapa y controles */}
-        {selectedMascotaId ? ( 
-          <div className="md:w-3/5 md:h-[92%] flex flex-col mt-4 h-[60%]">
-            {/* Contenedor del mapa */}
-            <div className="h-[50%] w-full px-5">
-              {/* MapMascotaComponent probablemente espera latitud/longitud, así que no necesita la transformación */}
-              <MapMascotaComponent 
-                imagen={imagenMascota} 
-                // Pasar los puntos transformados (que aún tienen lat/lon)
-                puntos={puntosActivos} 
-                zoom={zoom}
-                key={selectedMascotaId} 
-              />
-            </div>
-
-            {/* Controles debajo del mapa */}
-            <div className="w-full px-5 mt-4 flex justify-between items-center h-fit ">
-              {/* Botones de control de ubicaciones */}
-              <div className="flex space-x-2">
-                <button
-                  onClick={handleMostrarUltimaUbicacion}
-                  disabled={!selectedMascotaId || cargandoUltima || cargandoTodas} 
-                  className={`px-4 py-2 rounded-md shadow ${vistaActiva === 'ultima' ? 'bg-blue-500 text-white' : 'bg-white hover:bg-gray-100'} ${(!selectedMascotaId || cargandoUltima || cargandoTodas) ? 'opacity-50 cursor-not-allowed' : ''}`}
-                >
-                  {cargandoUltima ? 'Cargando...' : 'Última ubicación'} 
-                </button>
-                <button
-                  onClick={handleMostrarTodasUbicaciones}
-                  disabled={!selectedMascotaId || cargandoUltima || cargandoTodas} 
-                  className={`px-4 py-2 rounded-md shadow ${vistaActiva === 'todas' ? 'bg-blue-500 text-white' : 'bg-white hover:bg-gray-100'} ${(!selectedMascotaId || cargandoUltima || cargandoTodas) ? 'opacity-50 cursor-not-allowed' : ''}`}
-                >
-                  {cargandoTodas ? 'Cargando...' : 'Todas las ubicaciones'}
-                </button>
-              </div>
-              
-              {/* Controles de zoom */}
-              <div className="flex space-x-2">
-                <button 
-                  onClick={handleZoomOut}
-                  className="bg-white p-2 rounded-md shadow hover:bg-gray-100"
-                  title="Alejar"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                    <path fillRule="evenodd" d="M5 10a1 1 0 011-1h8a1 1 0 110 2H6a1 1 0 01-1-1z" clipRule="evenodd" />
-                  </svg>
-                </button>
-                <button 
-                  onClick={handleZoomIn}
-                  className="bg-white p-2 rounded-md shadow hover:bg-gray-100"
-                  title="Acercar"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                    <path fillRule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clipRule="evenodd" />
-                  </svg>
-                </button>
-              </div>
-            </div>
-
-            {/* Tabla de ubicaciones */}
-            <div className="h-fit w-full mt-4 px-5 md:px-10 max-h-[20vh]">
-              <h1 className="text-2xl font-bold mb-4">Ubicaciones de {nombreMascota || 'mascota seleccionada'}</h1>
-              {/* Pasar los puntos YA TRANSFORMADOS a la tabla */}
-              <TablaUbicacionMascota datos={puntosActivos} /> 
-            </div>
-          </div>
-        ) : (
-          <div className="w-1/2 h-full flex items-center justify-center text-gray-500">
-            <p>Selecciona una mascota de la lista.</p> 
-          </div>
-        )}
       </div>
        {mascotaParaModal && <ModalMascota idMascota={mascotaParaModal} closeModal={cerrarModal} />} 
        
