@@ -51,7 +51,7 @@ const Perfil = () => {
     <div className="min-h-screen bg-gray-100 p-6">
       <div className="max-w-4xl mx-auto bg-white rounded-lg shadow-md overflow-hidden">
         {/* Encabezado del perfil */}
-        <div className="bg-primary p-6 text-white flex items-center">
+        <div className="bg-[#e0ecfc] p-6 text-gray-800 flex items-center"> 
           <div className="w-24 h-24 rounded-full bg-white flex items-center justify-center overflow-hidden mr-6">
             <img 
               src="/assets/fotoPerfil.png" 
@@ -61,9 +61,9 @@ const Perfil = () => {
           </div>
           <div>
             <h1 className="text-2xl font-bold">
-              {usuario.nombre || 'Usuario'} {usuario.apellido || ''}
+              {usuario.nombre || 'Usuario'} {usuario.nombre || ''}
             </h1>
-            <p className="text-white/80">{user?.email || 'Correo no disponible'}</p>
+            <p className="">{user?.email || 'Correo no disponible'}</p>
           </div>
         </div>
 
@@ -175,7 +175,7 @@ const Perfil = () => {
               <div className="flex justify-end">
                 <button
                   onClick={() => setEditando(true)}
-                  className="px-4 py-2 bg-primary text-white rounded hover:bg-primary-dark"
+                  className="px-4 py-2 bg-[#e0ecfc] text-gray-800 rounded hover:bg-[#c6d8f5] transition-colors font-medium"
                 >
                   Editar perfil
                 </button>
