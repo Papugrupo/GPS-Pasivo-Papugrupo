@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { actualizarUsuario, obtenerUsuario } from '../services/usuario.service';
+import { obtenerListadoMascotas } from '../services/mascota.service';
 
 const Perfil = () => {
   const { user } = useAuth();
@@ -13,15 +14,27 @@ const Perfil = () => {
   const [editando, setEditando] = useState(false);
   const [mensaje, setMensaje] = useState('');
 
+  const [mascotas, setMascotas] = useState([]);
+  const [loadingMascotas, setLoadingMascotas] = useState(false);
+  const [errorMascotas, setErrorMascotas] = useState(null);
+
   useEffect(() => {
     const cargarDatosUsuario = async () => {
       try {
         if (user?.email) {
+          // Obtener datos del usuario desde el backend
           const datos = await obtenerUsuario(user.email);
           setUsuario(datos);
+
+          // Aquí podrías cargar las mascotas del usuario si es necesario
+          setLoadingMascotas(true);
+          const response = await obtenerListadoMascotas();
+          setMascotas(response);
+          setLoadingMascotas(false);
         }
       } catch (error) {
         console.error('Error al cargar datos del usuario:', error);
+        setLoadingMascotas(false);
       }
     };
     
@@ -93,7 +106,7 @@ const Perfil = () => {
                   <input
                     type="email"
                     name="email"
-                    value={usuario.email}
+                    value={usuario.correo}
                     onChange={handleChange}
                     className="w-full p-2 border rounded bg-gray-100"
                     disabled
@@ -171,8 +184,24 @@ const Perfil = () => {
         {/* Sección de mascotas (opcional) */}
         <div className="border-t p-6">
           <h2 className="text-xl font-semibold mb-4">Mis Mascotas</h2>
-          <p className="text-gray-600">Aquí podrás ver y gestionar tus mascotas registradas.</p>
-          {/* Aquí podrías agregar un listado de mascotas como en tu ejemplo */}
+          {loadingMascotas ? (
+            <div className = "text-center py-4">
+              <p>Cargando mascotas...</p>
+            </div>
+          ) : mascotas.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {mascotas.map((mascota) => (
+                <div key={mascota.idMascota} className="bg-white p-4 rounded shadow-md">
+                  <img src={mascota.urlFoto} alt={mascota.nombre} className="w-full h-32 object-cover rounded mb-2" />
+                  <h3 className="text-lg font-semibold">{mascota.nombre}</h3>
+                  <p className="text-gray-600">Especie: {mascota.especie}</p>
+                  <p className="text-gray-600">Raza: {mascota.raza}</p>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p>No hay mascotas registradas.</p>
+          )}
         </div>
       </div>
     </div>
