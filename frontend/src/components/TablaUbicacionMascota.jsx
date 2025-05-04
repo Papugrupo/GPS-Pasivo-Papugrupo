@@ -50,7 +50,7 @@ const TablaUbicacionMascota = ({ datos }) => {
         </table>
 
         {/* Cuerpo scrollable */}
-        <div className="h-[25vh] overflow-y-auto">
+        <div className="h-[15vh] md:h-[20vh] overflow-y-auto">
           <table className="min-w-full divide-y divide-gray-200">
             <tbody>
               {pageData.map((item, index) => (

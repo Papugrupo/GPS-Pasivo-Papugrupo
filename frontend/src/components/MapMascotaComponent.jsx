@@ -44,7 +44,7 @@ const MapMascotaComponent = ({ imagen , puntos }) => {
             // 2. Crear marcador (imagen)
             const marcador = document.createElement('div');
             marcador.className = 'w-10 h-10 bg-no-repeat bg-contain cursor-pointer rounded-full border-4 border-red-500';
-            marcador.style.backgroundImage = `url(data:image/jpeg;base64,${imagen})`;
+            marcador.style.backgroundImage = `url(${imagen})`;
             marcador.style.backgroundSize = 'cover';
             marcador.style.backgroundPosition = 'center';
         
@@ -82,7 +82,7 @@ const MapMascotaComponent = ({ imagen , puntos }) => {
   }, [imagen, puntos]);
 
   return (
-    <div style={{width: '100%', height: '500px', position: 'relative'}}>
+    <div style={{width: '100%', height: '100%', position: 'relative'}}>
       <div 
         ref={mapContainer} 
         style={{

@@ -23,7 +23,7 @@ const TarjetaMascota = ({ idMascota }) => {
         const data = await obtenerMascota(idMascota);
         setMascota(data);
       } catch (err) {
-        console.error('Error al obtener la mascota');
+        console.error('Error al obtener la mascota',err);
       }
     };
     fetchMascota();
