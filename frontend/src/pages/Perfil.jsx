@@ -6,7 +6,6 @@ const Perfil = () => {
   const { user } = useAuth();
   const [usuario, setUsuario] = useState({
     nombre: '',
-    apellido: '',
     email: '',
     telefono: '',
     direccion: ''
@@ -61,7 +60,7 @@ const Perfil = () => {
           </div>
           <div>
             <h1 className="text-2xl font-bold">
-              {usuario.nombre || 'Usuario'} {usuario.nombre || ''}
+              {usuario.nombre || 'Usuario'}
             </h1>
             <p className="">{user?.email || 'Correo no disponible'}</p>
           </div>
@@ -84,17 +83,6 @@ const Perfil = () => {
                     type="text"
                     name="nombre"
                     value={usuario.nombre}
-                    onChange={handleChange}
-                    className="w-full p-2 border rounded"
-                    required
-                  />
-                </div>
-                <div>
-                  <label className="block text-gray-700 mb-2">Apellido</label>
-                  <input
-                    type="text"
-                    name="apellido"
-                    value={usuario.apellido}
                     onChange={handleChange}
                     className="w-full p-2 border rounded"
                     required
@@ -156,12 +144,8 @@ const Perfil = () => {
                   <p className="text-lg">{usuario.nombre || 'No especificado'}</p>
                 </div>
                 <div>
-                  <h3 className="text-gray-500 text-sm">Apellido</h3>
-                  <p className="text-lg">{usuario.apellido || 'No especificado'}</p>
-                </div>
-                <div>
                   <h3 className="text-gray-500 text-sm">Email</h3>
-                  <p className="text-lg">{usuario.email || 'No especificado'}</p>
+                  <p className="text-lg">{usuario.correo || 'No especificado'}</p>
                 </div>
                 <div>
                   <h3 className="text-gray-500 text-sm">Teléfono</h3>
