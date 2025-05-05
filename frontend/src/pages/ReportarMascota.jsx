@@ -120,11 +120,13 @@ const ReportarMascota = () => {
             <div className="bg-white bg-opacity-95 p-5 sm:p-6 md:p-8 rounded-lg shadow-lg w-full max-w-md">
                 
                 <div className="flex justify-center mb-4">
-                    <img 
-                        src={`${formData.imagenBase64}`} 
+                    {formData.imagenBase64 !== '' && (
+                        <img 
+                        src={formData.imagenBase64} 
                         alt="Imagen de mascota" 
                         className="w-fit h-[15vh] object-contain rounded-2xl"
-                    />
+                        />
+                    )}
                 </div>
 
                 <form className="space-y-4" onSubmit={handleSubmit}>
