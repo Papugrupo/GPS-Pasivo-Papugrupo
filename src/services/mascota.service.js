@@ -9,7 +9,7 @@ export const obtenerMascota = async (idMascota) => {
       console.error('Error al obtener la mascota:', error);
       throw error;
     }
-  };
+};
 
 export const obtenerMascotaQR = async (idMascota) => {
     
@@ -57,6 +57,20 @@ export const reportarMascota = async (idMascota, latitud, longitud) => {
         return response.data;
     } catch (error) {
         console.error('Error al reportar ubicación de la mascota:', error);
+        throw error;
+    }
+}
+
+export const obtenerUbicacionesMascota = async (idMascota) => {
+    try {
+        const response = await axiosAuth.get(`/api/pet/pet-location/${idMascota}`);
+        console.log('response', response.data);
+        if (response.data.length === 0) {
+            return response.data;
+        }
+        return response.data;
+    } catch (error) {
+        console.error('Error al obtener ubicaciones de la mascota:', error);
         throw error;
     }
 }

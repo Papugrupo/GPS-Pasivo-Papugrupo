@@ -17,6 +17,7 @@ export const loginUsuario = async (usuario) => {
     try {
         const response = await axiosPublic.post(`/api/auth/login`, usuario);
         const token = response.data.token;
+        console.log('token', token);
         Cookies.set('token', token, { expires: 1 });
         return response.data;
     } catch (error) {
@@ -28,7 +29,7 @@ export const loginUsuario = async (usuario) => {
 export const obtenerUsuario = async (email) => {
 
     try {
-        const response = await axiosAuth.get(`/api/users/${email}`);
+        const response = await axiosAuth.get(`/api/user/${email}`);
         return response.data;
     } catch (error) {
         console.error('Error al obtener datos del usuario:', error);
@@ -39,7 +40,7 @@ export const obtenerUsuario = async (email) => {
 export const actualizarUsuario = async (usuario) => {
 
     try {
-        const response = await axiosAuth.put(`api/users/${usuario.email}`, usuario);
+        const response = await axiosAuth.put(`api/user/${usuario.correo}`, usuario);
         return response.data;
     } catch (error) {
         console.error('Error al actualizar usuario:', error);

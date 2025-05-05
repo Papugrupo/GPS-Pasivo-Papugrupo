@@ -18,7 +18,6 @@ export default function Sidebar({ isOpen, closeSidebar }) {
       <nav className="p-6 flex flex-col gap-4">
         <a href="/mapa" className="hover:text-[var(--color-secondary)]">Mapa</a>
         <a href="/registro-mascota" className="hover:text-[var(--color-secondary)]">Registrar Mascota</a>
-        <a href="/registro" className="hover:text-[var(--color-secondary)]">Registrar Usuario</a>
       </nav>
     </aside>
   );
