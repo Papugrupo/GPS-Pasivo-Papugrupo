@@ -9,7 +9,7 @@ export const obtenerMascota = async (idMascota) => {
       console.error('Error al obtener la mascota:', error);
       throw error;
     }
-  };
+};
 
 export const obtenerMascotaQR = async (idMascota) => {
     

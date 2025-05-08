@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { actualizarUsuario, obtenerUsuario } from '../services/usuario.service';
+import { obtenerListadoMascotas } from '../services/mascota.service';
 
 const Perfil = () => {
   const { user } = useAuth();
   const [usuario, setUsuario] = useState({
     nombre: '',
-    apellido: '',
     email: '',
     telefono: '',
     direccion: ''
@@ -14,15 +14,27 @@ const Perfil = () => {
   const [editando, setEditando] = useState(false);
   const [mensaje, setMensaje] = useState('');
 
+  const [mascotas, setMascotas] = useState([]);
+  const [loadingMascotas, setLoadingMascotas] = useState(false);
+  const [errorMascotas, setErrorMascotas] = useState(null);
+
   useEffect(() => {
     const cargarDatosUsuario = async () => {
       try {
         if (user?.email) {
+          // Obtener datos del usuario desde el backend
           const datos = await obtenerUsuario(user.email);
           setUsuario(datos);
+
+          // Aquí podrías cargar las mascotas del usuario si es necesario
+          setLoadingMascotas(true);
+          const response = await obtenerListadoMascotas();
+          setMascotas(response);
+          setLoadingMascotas(false);
         }
       } catch (error) {
         console.error('Error al cargar datos del usuario:', error);
+        setLoadingMascotas(false);
       }
     };
     
@@ -51,7 +63,7 @@ const Perfil = () => {
     <div className="min-h-screen bg-gray-100 p-6">
       <div className="max-w-4xl mx-auto bg-white rounded-lg shadow-md overflow-hidden">
         {/* Encabezado del perfil */}
-        <div className="bg-primary p-6 text-white flex items-center">
+        <div className="bg-[#e0ecfc] p-6 text-gray-800 flex items-center"> 
           <div className="w-24 h-24 rounded-full bg-white flex items-center justify-center overflow-hidden mr-6">
             <img 
               src="/assets/fotoPerfil.png" 
@@ -61,9 +73,9 @@ const Perfil = () => {
           </div>
           <div>
             <h1 className="text-2xl font-bold">
-              {usuario.nombre || 'Usuario'} {usuario.apellido || ''}
+              {usuario.nombre || 'Usuario'}
             </h1>
-            <p className="text-white/80">{user?.email || 'Correo no disponible'}</p>
+            <p className="">{user?.email || 'Correo no disponible'}</p>
           </div>
         </div>
 
@@ -90,22 +102,11 @@ const Perfil = () => {
                   />
                 </div>
                 <div>
-                  <label className="block text-gray-700 mb-2">Apellido</label>
-                  <input
-                    type="text"
-                    name="apellido"
-                    value={usuario.apellido}
-                    onChange={handleChange}
-                    className="w-full p-2 border rounded"
-                    required
-                  />
-                </div>
-                <div>
                   <label className="block text-gray-700 mb-2">Email</label>
                   <input
                     type="email"
                     name="email"
-                    value={usuario.email}
+                    value={usuario.correo}
                     onChange={handleChange}
                     className="w-full p-2 border rounded bg-gray-100"
                     disabled
@@ -142,7 +143,7 @@ const Perfil = () => {
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-primary text-white rounded hover:bg-primary-dark"
+                  className="px-4 py-2 bg-[#e0ecfc] text-gray-800 rounded hover:bg-[#c6d8f5] transition-colors font-medium"
                 >
                   Guardar cambios
                 </button>
@@ -156,12 +157,8 @@ const Perfil = () => {
                   <p className="text-lg">{usuario.nombre || 'No especificado'}</p>
                 </div>
                 <div>
-                  <h3 className="text-gray-500 text-sm">Apellido</h3>
-                  <p className="text-lg">{usuario.apellido || 'No especificado'}</p>
-                </div>
-                <div>
                   <h3 className="text-gray-500 text-sm">Email</h3>
-                  <p className="text-lg">{usuario.email || 'No especificado'}</p>
+                  <p className="text-lg">{usuario.correo || 'No especificado'}</p>
                 </div>
                 <div>
                   <h3 className="text-gray-500 text-sm">Teléfono</h3>
@@ -175,7 +172,7 @@ const Perfil = () => {
               <div className="flex justify-end">
                 <button
                   onClick={() => setEditando(true)}
-                  className="px-4 py-2 bg-primary text-white rounded hover:bg-primary-dark"
+                  className="px-4 py-2 bg-[#e0ecfc] text-gray-800 rounded hover:bg-[#c6d8f5] transition-colors font-medium"
                 >
                   Editar perfil
                 </button>
@@ -187,8 +184,23 @@ const Perfil = () => {
         {/* Sección de mascotas (opcional) */}
         <div className="border-t p-6">
           <h2 className="text-xl font-semibold mb-4">Mis Mascotas</h2>
-          <p className="text-gray-600">Aquí podrás ver y gestionar tus mascotas registradas.</p>
-          {/* Aquí podrías agregar un listado de mascotas como en tu ejemplo */}
+          {loadingMascotas ? (
+            <div className = "text-center py-4">
+              <p>Cargando mascotas...</p>
+            </div>
+          ) : mascotas.length > 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {mascotas.map((mascota) => (
+                <div key={mascota.idMascota} className="bg-white p-4 rounded shadow-md">
+                  <h3 className="text-lg font-semibold">{mascota.nombre}</h3>
+                  <p className="text-gray-600">Especie: {mascota.especie}</p>
+                  <p className="text-gray-600">Raza: {mascota.raza}</p>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <p>No hay mascotas registradas.</p>
+          )}
         </div>
       </div>
     </div>
