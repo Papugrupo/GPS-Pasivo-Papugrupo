@@ -62,16 +62,16 @@ const TarjetaMascota = ({ idMascota, onSeleccionar, seleccionada }) => {
   };
 
   // Determinar el estilo si la tarjeta está seleccionada
-  const cardClassName = `w-full hover:bg-blue-300 rounded-lg p-2 mb-2 ${seleccionada ? 'bg-blue-200 border-blue-400' : 'bg-blue-100'}`;
+  const cardClassName = `w-full hover:bg-blue-300 rounded-lg p-2 mb-2 ${seleccionada ? 'bg-blue-400 border-blue-400' : 'bg-blue-100'}`;
 
   return (
     // Aplicar clase condicional al div principal
     <div className={cardClassName} > 
-      <div className='flex flex-row'>
+      <div className='flex flex-row justify-center items-end'>
         <button className="flex w-full items-center justify-between" onClick={handleSeleccionChange}> 
           {/* Quitar stopPropagation de este div */}
           <div className="flex w-full gap-2 items-center"> 
-            <img src={imagenMascota} alt="Foto mascota" className="w-10 h-10 object-cover rounded-2xl" />
+            <img src={imagenMascota} alt="Foto mascota" className="flex w-10 h-10 transition-all delay-100 hover:w-30 hover:h-30 object-cover rounded-2xl" />
             <span className="font-semibold">{mascota.nombre || 'Cargando...'}</span>
             
           </div>
@@ -83,7 +83,7 @@ const TarjetaMascota = ({ idMascota, onSeleccionar, seleccionada }) => {
           */}
 
         </button>
-        <button onClick={toggleDesplegado} className={`flex hover:bg-blue-200 ${desplegado ? 'bg-white': null} rounded items-center justify-center`}>
+        <button onClick={toggleDesplegado} className={`flex h-10 hover:bg-blue-200 ${desplegado ? 'bg-white': null} rounded items-center justify-end`}>
           <div className="self-center px-2 text-gray-500 focus:outline-none" >
                 {desplegado ? <IoIosArrowDropup /> : <IoIosArrowDropdown /> }
           </div>
