@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { obtenerMascota } from '../services/mascota.service.js';
 import ModalQR from './ModalQR';
 import ModalMascota from './ModalMascota.jsx';
+import { IoIosArrowDropdown,IoIosArrowDropup } from "react-icons/io";
 
 // Añadir onSeleccionar y seleccionada a las props
 const TarjetaMascota = ({ idMascota, onSeleccionar, seleccionada }) => { 
@@ -61,40 +62,39 @@ const TarjetaMascota = ({ idMascota, onSeleccionar, seleccionada }) => {
   };
 
   // Determinar el estilo si la tarjeta está seleccionada
-  const cardClassName = `border rounded-lg p-2 mb-2 ${seleccionada ? 'bg-blue-200 border-blue-400' : 'bg-blue-100'}`;
+  const cardClassName = `w-full hover:bg-blue-300 rounded-lg p-2 mb-2 ${seleccionada ? 'bg-blue-200 border-blue-400' : 'bg-blue-100'}`;
 
   return (
     // Aplicar clase condicional al div principal
-    <div className={cardClassName}> 
-      {/* Quitar onClick de este div */}
-      <div className="flex items-center justify-between"> 
-        {/* Quitar stopPropagation de este div */}
-        <div className="flex items-center"> 
-          <button className="mr-2 focus:outline-none" onClick={toggleDesplegado}>
-            {desplegado ? '▼' : '▶'}
-          </button>
-          <span className="font-semibold">{mascota.nombre || 'Cargando...'}</span>
-        </div>
-        {/* 
-          El input radio ahora es el ÚNICO control para la selección.
-          Se mantiene checked={seleccionada} para reflejar el estado.
-          Se mantiene onChange={handleSeleccionChange} para detectar el click.
-          onClick con stopPropagation ya no es estrictamente necesario aquí, pero se puede dejar por seguridad.
-        */}
-        <input 
-          type="radio" 
-          name="seleccionMascota" // Asegúrate que el name sea el mismo para todas las tarjetas para que actúen como un grupo de radio buttons
-          className="ml-2 cursor-pointer" 
-          checked={seleccionada} 
-          onChange={handleSeleccionChange} // El cambio dispara la selección
-          // onClick={(e) => e.stopPropagation()} // Opcional: previene que el click propague más arriba si fuera necesario
-        />
+    <div className={cardClassName} > 
+      <div className='flex flex-row'>
+        <button className="flex w-full items-center justify-between" onClick={handleSeleccionChange}> 
+          {/* Quitar stopPropagation de este div */}
+          <div className="flex w-full gap-2 items-center"> 
+            <img src={imagenMascota} alt="Foto mascota" className="w-10 h-10 object-cover rounded-2xl" />
+            <span className="font-semibold">{mascota.nombre || 'Cargando...'}</span>
+            
+          </div>
+          {/* 
+            El input radio ahora es el ÚNICO control para la selección.
+            Se mantiene checked={seleccionada} para reflejar el estado.
+            Se mantiene onChange={handleSeleccionChange} para detectar el click.
+            onClick con stopPropagation ya no es estrictamente necesario aquí, pero se puede dejar por seguridad.
+          */}
+
+        </button>
+        <button onClick={toggleDesplegado} className={`flex hover:bg-blue-200 ${desplegado ? 'bg-white': null} rounded items-center justify-center`}>
+          <div className="self-center px-2 text-gray-500 focus:outline-none" >
+                {desplegado ? <IoIosArrowDropup /> : <IoIosArrowDropdown /> }
+          </div>
+        </button>
       </div>
+      
 
       {desplegado && (
         <div className="mt-2 p-2 bg-white rounded shadow">
           <div className="flex flex-col sm:flex-row items-center sm:space-x-4 space-y-2 sm:space-y-0">   
-            <img src={imagenMascota} alt="Foto mascota" className="w-20 h-20 object-cover rounded" />
+            
             <div className="text-sm">
               <p><strong>Nombre:</strong> {mascota.nombre || 'N/A'}</p>
               <p><strong>Raza:</strong> {mascota.raza || 'N/A'}</p>
