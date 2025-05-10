@@ -190,7 +190,12 @@ const MapaMascota = () => {
   };
 
   return (
-    <div className="flex flex-col min-h-screen md:min-h-170 md:h-[95vh] bg-[url('/assets/gps_background.png')] bg-cover bg-bottom p-2 md:pt-2 ">
+    <div className="flex flex-col min-h-screen md:min-h-170 md:h-[95vh]  p-2 md:pt-2 " 
+    style={{
+      backgroundImage: `linear-gradient(rgba(255, 255, 255, 1), rgba(255, 255, 255, 0.3)), url('/assets/gps_background.png')`,
+      backgroundSize: 'cover',
+      backgroundPosition: 'bottom',
+    }}>
       <div className="h-full flex justify-center">
         {/* Mitad izquierda - listado de mascotas */}
         <div className='flex flex-col md:flex-row w-full md:w-4/5 md:justify-center rounded-2xl shadow-xl bg-blue-600/10 p-2'>
