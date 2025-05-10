@@ -15,11 +15,11 @@ export default function Layout() {
   };
 
   return (
-    <div className="flex h-screen">
+    <div className="flex">
       <Sidebar isOpen={sidebarOpen} closeSidebar={closeSidebar} /> {/* AQUÍ PASAMOS closeSidebar */}
-      <div className="flex flex-col flex-1">
+      <div className="flex flex-col w-full">
         <Header toggleSidebar={toggleSidebar} />
-        <main className="flex-1 p-4 overflow-y-auto">
+        <main className="flex-1 bg-blue-100">
           <Outlet />
         </main>
       </div>

@@ -13,7 +13,7 @@ export default function Header({ toggleSidebar }) {
   };
 
   return (
-    <header className="bg-primary text-white flex items-center px-6 py-1 shadow-md h-16 relative">
+    <header className="sticky top-0 bg-primary text-white flex items-center px-6 py-1 shadow-md h-16 z-10">
 
       {/* Botón hamburguesa */}
       <button
