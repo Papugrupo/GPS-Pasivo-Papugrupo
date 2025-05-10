@@ -62,11 +62,15 @@ const TarjetaMascota = ({ idMascota, onSeleccionar, seleccionada }) => {
   };
 
   // Determinar el estilo si la tarjeta está seleccionada
-  const cardClassName = `w-full bg-[url('/assets/fondo.png')] bg-cover bg-center hover:bg-blue-300 rounded-lg p-2 mb-2 ${seleccionada ? 'bg-blue-400 border-blue-400' : 'bg-blue-100'}`;
+  const cardClassName = `w-full hover:bg-blue-600 rounded-lg p-2 mb-2 ${seleccionada ? 'bg-blue-500 border border-blue-400' : 'bg-blue-100'}`;
 
   return (
     // Aplicar clase condicional al div principal
-    <div className={cardClassName} > 
+    <div className={cardClassName} style={{
+      backgroundImage: `linear-gradient(rgba(255, 255, 255, 0.4), rgba(255, 255, 255, 0.4)), url('/assets/fondo.png')`,
+      backgroundSize: 'cover',
+      backgroundPosition: 'center',
+    }} > 
       <div className='flex flex-row justify-center items-end'>
         <button className="flex w-full items-center justify-between" onClick={handleSeleccionChange}> 
           {/* Quitar stopPropagation de este div */}
@@ -83,7 +87,7 @@ const TarjetaMascota = ({ idMascota, onSeleccionar, seleccionada }) => {
           */}
 
         </button>
-        <button onClick={toggleDesplegado} className={`flex h-10 hover:bg-blue-200 ${desplegado ? 'bg-white': null} rounded items-center justify-end`}>
+        <button onClick={toggleDesplegado} className={`flex h-10 hover:bg-white ${desplegado ? 'bg-white': null} rounded items-center justify-end`}>
           <div className="self-center px-2 text-gray-500 focus:outline-none" >
                 {desplegado ? <IoIosArrowDropup /> : <IoIosArrowDropdown /> }
           </div>
