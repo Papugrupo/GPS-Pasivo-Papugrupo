@@ -4,6 +4,11 @@ import { obtenerMascota, obtenerListadoMascotas, obtenerUbicacionesMascota } fro
 import TablaUbicacionMascota from '../components/TablaUbicacionMascota.jsx';
 import ModalMascota from '../components/ModalMascota.jsx';
 import TarjetaMascota from '../components/TarjetaMascota.jsx';
+import { MdPets } from "react-icons/md";
+import { MdMap } from "react-icons/md";
+import { MdLocationPin } from "react-icons/md";
+
+
 
 // Helper function to transform location data
 const transformarUbicacion = (ubicacion) => {
@@ -185,15 +190,23 @@ const MapaMascota = () => {
   };
 
   return (
-    <div className="flex flex-col md:h-[85vh] h-screen">
+    <div className="flex flex-col min-h-screen md:min-h-170 md:h-[95vh]  p-2 md:pt-2 " 
+    style={{
+      backgroundImage: `linear-gradient(rgba(255, 255, 255, 1), rgba(255, 255, 255, 0.3)), url('/assets/gps_background.png')`,
+      backgroundSize: 'cover',
+      backgroundPosition: 'bottom',
+    }}>
       <div className="h-full flex justify-center">
         {/* Mitad izquierda - listado de mascotas */}
-        <div className='flex flex-col md:flex-row w-full md:w-4/5 md:h-full md:justify-center bg-gray-100 rounded-2xl'>
-          <div className="md:w-2/5 p-4 md:h-[100%] h-[30%]">
-            <div className="bg-white p-4 rounded-lg shadow h-full">
-              <h2 className="text-xl font-semibold mb-4">Mascotas</h2>
-              <p>Selecciona una mascota:</p>
-              <div className="mt-2 h-[80%] md:h-[95%] overflow-y-auto">
+        <div className='flex flex-col md:flex-row w-full md:w-4/5 md:justify-center rounded-2xl shadow-xl bg-blue-600/10 p-2'>
+          <div className="flex flex-col  md:w-2/5  rounded-2xl ">
+            <div className="flex flex-col flex-5/6  p-4 rounded-lg shadow-xl ">
+            
+              <div className='flex justify-center items-center gap-3 pb-3'>
+                <MdPets />
+                <h2 className="text-xl font-semibold">Mis Mascotas</h2>
+              </div>
+              <div className="md:h-[95%] overflow-y-auto md:max-h-130 max-h-50">
                 {listaMascotas.map((mascota) => (
                   <TarjetaMascota 
                     key={mascota.idMascota} 
@@ -204,13 +217,18 @@ const MapaMascota = () => {
                 ))}
               </div>
             </div>
+            <div className=' flex-1/6 '/> {/* Para el espacio despues del listado de mascotas */}
           </div>
 
           {/* Mitad derecha - mapa y controles */}
           {selectedMascotaId ? ( 
-            <div className="md:w-3/5 md:h-[92%] flex flex-col mt-4 h-[60%]">
+            <div className="md:ml-2 md:w-4/5 flex flex-col p-4 h-200 md:h-150 shadow-xl rounded-2xl">
+              <div className='flex items-center justify-center gap-3 mb-3'>
+                <MdMap />
+                <h2 className="text-xl font-semibold  ">Mapa de ubicaciones</h2>
+              </div>
               {/* Contenedor del mapa */}
-              <div className="h-[50%] w-full px-5">
+              <div className="max-h-70 w-full px-5 h-full ">
                 {/* MapMascotaComponent probablemente espera latitud/longitud, así que no necesita la transformación */}
                 <MapMascotaComponent 
                   imagen={imagenMascota} 
@@ -222,9 +240,9 @@ const MapaMascota = () => {
               </div>
 
               {/* Controles debajo del mapa */}
-              <div className="w-full px-5 mt-4 flex justify-between items-center h-fit ">
+              <div className="w-full px-5 py-4 flex justify-between items-center h-fit ">
                 {/* Botones de control de ubicaciones */}
-                <div className="flex space-x-2">
+                <div className="flex justify-around w-full  ">
                   <button
                     onClick={handleMostrarUltimaUbicacion}
                     disabled={!selectedMascotaId || cargandoUltima || cargandoTodas} 
@@ -242,7 +260,7 @@ const MapaMascota = () => {
                 </div>
                 
                 {/* Controles de zoom */}
-                <div className="flex space-x-2">
+                {/*<div className="flex space-x-2">
                   <button 
                     onClick={handleZoomOut}
                     className="bg-white p-2 rounded-md shadow hover:bg-gray-100"
@@ -261,19 +279,23 @@ const MapaMascota = () => {
                       <path fillRule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clipRule="evenodd" />
                     </svg>
                   </button>
-                </div>
+                </div>*/}
               </div>
 
               {/* Tabla de ubicaciones */}
-              <div className="h-fit w-full mt-4 px-5 md:px-10 max-h-[20vh]">
-                <h1 className="text-2xl font-bold mb-4">Ubicaciones de {nombreMascota || 'mascota seleccionada'}</h1>
+              <div className="w-full shadow-2xl">
+                <div className='flex items-center justify-center gap-3 mb-3'>
+                  <MdLocationPin />
+                  <h2 className="text-xl font-semibold ">Ubicaciones de {nombreMascota || 'mascota seleccionada'}</h2>
+                </div>
+                
                 {/* Pasar los puntos YA TRANSFORMADOS a la tabla */}
                 <TablaUbicacionMascota datos={puntosActivos} /> 
               </div>
             </div>
             
           ) : (
-            <div className="w-1/2 h-full flex items-center justify-center text-gray-500">
+            <div className="flex p-8 w-1/2 h-full flex items-center justify-center text-gray-900">
               <p>Selecciona una mascota de la lista.</p> 
             </div>
           )}
