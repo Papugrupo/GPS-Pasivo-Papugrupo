@@ -301,7 +301,26 @@ const MapaMascota = () => {
           )}
         </div>
       </div>
-       {mascotaParaModal && <ModalMascota idMascota={mascotaParaModal} closeModal={cerrarModal} />} 
+       {mascotaParaModal && 
+          <ModalMascota 
+            idMascota={mascotaParaModal} 
+            closeModal={cerrarModal} 
+            onMascotaActualizada={() => {
+                // Recargar las mascotas después de una actualización
+                const cargarMascotas = async () => {
+                  setLoadingMascotas(true);
+                  try {
+                    const response = await obtenerListadoMascotas();
+                    setMascotas(response);
+                  } catch (error) {
+                    console.error('Error al cargar mascotas:', error);
+                    setErrorMascotas('Error al cargar las mascotas');
+                  }
+                  setLoadingMascotas(false);
+                };
+                cargarMascotas();
+              }}
+          />} 
        
     </div>
   );
