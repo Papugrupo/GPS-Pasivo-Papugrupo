@@ -117,6 +117,9 @@ const MapaMascota = () => {
 
       const ubicacionesOriginales = responseData && Array.isArray(responseData.ubicaciones) ? responseData.ubicaciones : [];
 
+      //ordenar las ubicaciones por fecha ascendente
+      ubicacionesOriginales.sort((a, b) => new Date(a.fecha) - new Date(b.fecha));
+
       if (ubicacionesOriginales.length > 0) {
         const ultimaUbicacionOriginal = ubicacionesOriginales[ubicacionesOriginales.length - 1];
         // Transformar la última ubicación al formato esperado por la tabla
