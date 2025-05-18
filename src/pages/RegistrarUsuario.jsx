@@ -11,6 +11,9 @@ const RegistrarUsuario = () => {
         repetirContrasena: ''
     });
 
+    const [nombreError, setNombreError] = useState('');
+    const [direccionError, setDireccionError] = useState('');
+    const [telefonoError, setTelefonoError] = useState('');
     const [emailError, setEmailError] = useState('');
     const [passwordError, setPasswordError] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -34,6 +37,55 @@ const RegistrarUsuario = () => {
 
         if (name === 'correo') {
             verificarCorreo(value);
+        }
+        if (name === 'telefono') {
+            verificarTelefono(value);
+        }
+        if (name === 'nombre') {
+            verificarNombre(value);
+        }
+        if (name === 'direccion') {
+            verificarDireccion(value);
+        }
+    };
+
+    const verificarTelefono = (telefono) => {
+        if (telefono === '') {
+            setTelefonoError('');
+            return;
+        }
+
+        const regex = /^[0-9]{9}$/;
+
+        if (!regex.test(telefono)) {
+            setTelefonoError('El teléfono debe contener solo números y ser de 9 dígitos.');
+        } else {
+            setTelefonoError('');
+        }
+    };
+    const verificarNombre = (nombre) => {
+        if (nombre === '') {
+            setNombreError('');
+            return;
+        }
+        const regex = /^[a-zA-Z\s]+$/;
+        if (!regex.test(nombre)) {
+            setNombreError('El nombre solo puede contener letras y espacios.');
+        } else {
+            setNombreError('');
+        }
+    };
+
+    const verificarDireccion = (direccion) => {
+        if (direccion === '') {
+            setDireccionError('');
+            return;
+        }
+        const regex = /^[a-zA-Z0-9\s,.-]+$/;
+        if (!regex.test(direccion)) {
+            setDireccionError('La dirección solo puede contener letras, números y caracteres especiales como , . -');
+        } else {
+            setDireccionError('');
         }
     };
 
@@ -142,36 +194,56 @@ const RegistrarUsuario = () => {
                 <form className="space-y-4" onSubmit={handleSubmit}>
                     <div className="flex flex-col sm:flex-row sm:items-center space-y-2 sm:space-y-0 sm:space-x-4">
                         <label className="text-gray-700 font-semibold sm:w-40">Nombre</label>
+                        <div className="flex flex-col w-full">
                         <input
                             type="text"
                             name="nombre"
+                            placeholder='Ingrese su nombre'
                             value={formData.nombre}
                             onChange={handleChange}
-                            className="w-full bg-gray-100 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+                            className="w-full bg-gray-100 px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
                             required
                         />
+                        {nombreError && (
+                            <p className="text-red-500 text-sm mt-1">{nombreError}</p>
+                        )}
+                        </div>
                     </div>
 
                     <div className="flex flex-col sm:flex-row sm:items-center space-y-2 sm:space-y-0 sm:space-x-4">
                         <label className="text-gray-700 font-semibold sm:w-40">Dirección</label>
+                        <div className="flex flex-col w-full">
                         <input
                             type="text"
                             name="direccion"
+                            placeholder='Ingrese su dirección'
                             value={formData.direccion}
                             onChange={handleChange}
-                            className="w-full bg-gray-100 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+                            className="w-full bg-gray-100 px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+                            required
                         />
+                        {direccionError && (
+                            <p className="text-red-500 text-sm mt-1">{direccionError}</p>
+                        )}
+                        </div>
                     </div>
 
                     <div className="flex flex-col sm:flex-row sm:items-center space-y-2 sm:space-y-0 sm:space-x-4">
                         <label className="text-gray-700 font-semibold sm:w-40">N° Teléfono</label>
+                        <div className="flex flex-col w-full">
                         <input
                             type="tel"
                             name="telefono"
+                            placeholder='Ingrese su número de teléfono (9 dígitos)'
                             value={formData.telefono}
                             onChange={handleChange}
-                            className="w-full bg-gray-100 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+                            className="w-full bg-gray-100 px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+                            required
                         />
+                        {telefonoError && (
+                            <p className="text-red-500 text-sm mt-1">{telefonoError}</p>
+                        )}
+                        </div>
                     </div>
 
                     <div className="flex flex-col space-y-2 sm:space-y-0 sm:flex-row sm:items-center sm:space-x-4">
@@ -180,9 +252,10 @@ const RegistrarUsuario = () => {
                             <input
                                 type="email"
                                 name="correo"
+                                placeholder='Ingrese su correo electrónico'
                                 value={formData.correo}
                                 onChange={handleChange}
-                                className={`w-full bg-gray-100 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 ${emailError ? 'border-red-500 focus:ring-red-400' : 'focus:ring-blue-400'}`}
+                                className={`w-full bg-gray-100 px-4 py-2 rounded-lg focus:outline-none focus:ring-2 ${emailError ? 'border-red-500 focus:ring-red-400' : 'focus:ring-blue-400'}`}
                                 required
                             />
                             {emailError && (
@@ -196,9 +269,10 @@ const RegistrarUsuario = () => {
                         <input
                             type="password"
                             name="contrasena"
+                            placeholder='Ingrese su contraseña'
                             value={formData.contrasena}
                             onChange={handleChange}
-                            className="w-full bg-gray-100 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+                            className="w-full bg-gray-100 px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
                             required
                         />
                     </div>
@@ -209,9 +283,10 @@ const RegistrarUsuario = () => {
                             <input
                                 type="password"
                                 name="repetirContrasena"
+                                placeholder='Repita su contraseña'
                                 value={formData.repetirContrasena}
                                 onChange={handleChange}
-                                className={`w-full bg-gray-100 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 ${passwordError ? 'border-red-500 focus:ring-red-400' : 'focus:ring-blue-400'}`}
+                                className={`w-full bg-gray-100 px-4 py-2 rounded-lg focus:outline-none focus:ring-2 ${passwordError ? 'border-red-500 focus:ring-red-400' : 'focus:ring-blue-400'}`}
                                 required
                             />
                             {passwordError && (

@@ -235,7 +235,18 @@ const RegistrarMascota = () => {
       alert('Errores encontrados:\n\n' + errores.join('\n'));
       return;
     }
-    
+
+    // Convertir las fechas a formato ISO
+    for (let i = 0; i < mascotas.length; i++) {
+      mascotas[i].fechaNacimiento = new Date(mascotas[i].fechaNacimiento).toISOString();
+      if (mascotas[i].fechaMicrochip) {
+        mascotas[i].fechaMicrochip = new Date(mascotas[i].fechaMicrochip).toISOString();
+      }
+      if (mascotas[i].fechaDesparasitacion) {
+        mascotas[i].fechaDesparasitacion = new Date(mascotas[i].fechaDesparasitacion).toISOString();
+      }
+
+    }
 
     const data = {
       mascotas: mascotas
@@ -246,8 +257,6 @@ const RegistrarMascota = () => {
     const jsonMascotas = JSON.stringify(data);
 
     const responseMascotas = await registrarMascotas(jsonMascotas);
-
-    console.log(JSON.stringify(responseMascotas))
 
     setRegistroResponse(responseMascotas.mascotas)
     setIsModalOpen(true)

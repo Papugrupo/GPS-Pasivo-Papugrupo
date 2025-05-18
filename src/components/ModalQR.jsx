@@ -27,7 +27,7 @@ const ModalQR = ({ idMascota, closeModal }) => {
       if (mascota) {
         try {
           setCargandoQR(true);
-          const dataURL = await QRCode.toDataURL(`${urlBaseQR}/${mascota.idMascota}`);
+          const dataURL = await QRCode.toDataURL(`${urlBaseQR}/${idMascota}`);
           setImagenQR(dataURL);
         } catch (err) {
           console.error('Error al generar el QR:', err);

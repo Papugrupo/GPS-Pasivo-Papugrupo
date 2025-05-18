@@ -33,7 +33,7 @@ const TablaUbicacionMascota = ({ datos }) => {
 
   return (
     <div className="overflow-x-auto">
-      <div className="border border-gray-200 rounded-md bg-white">
+      <div className=" border border-gray-200 rounded-md bg-white">
         {/* Encabezado separado */}
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
@@ -50,7 +50,7 @@ const TablaUbicacionMascota = ({ datos }) => {
         </table>
 
         {/* Cuerpo scrollable */}
-        <div className="h-[15vh] md:h-[20vh] overflow-y-auto">
+        <div className="max-h-20 overflow-y-auto">
           <table className="min-w-full divide-y divide-gray-200">
             <tbody>
               {pageData.map((item, index) => (
