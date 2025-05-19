@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react';
 
-const TablaUbicacionMascota = ({ datos }) => {
+const TablaUbicacionMascota = ({ datos, mascotas }) => {
   const [currentPage, setCurrentPage] = useState(0);
   const [sortAsc, setSortAsc] = useState(true);
   const itemsPerPage = 10;
@@ -45,6 +45,7 @@ const TablaUbicacionMascota = ({ datos }) => {
                 Fecha {sortAsc ? '↑' : '↓'}
               </th>
               <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Coordenadas</th>
+              <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Mascota</th>
             </tr>
           </thead>
         </table>
@@ -59,6 +60,7 @@ const TablaUbicacionMascota = ({ datos }) => {
                     {`${item.dia}/${item.mes}/${item.anio} ${item.hora}:${item.minuto}:${item.segundo}`}
                   </td>
                   <td className="px-4 py-3 text-sm text-gray-700 w-1/2">{item.latitud},{item.longitud}</td>
+                  <td className="px-4 py-3 text-sm text-gray-700 w-1/2">{mascotas[item.mascotaId]?.nombre || 'Desconocida'}</td>
                 </tr>
               ))}
             </tbody>

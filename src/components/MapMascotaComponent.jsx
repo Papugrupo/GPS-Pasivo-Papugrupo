@@ -2,7 +2,7 @@ import React, { useEffect, useRef } from 'react';
 import maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 
-const MapMascotaComponent = ({ imagen , puntos }) => {
+const MapMascotaComponent = ({ mascotas , puntos }) => {
   const mapContainer = useRef(null);
   const map = useRef(null);
   
@@ -44,7 +44,7 @@ const MapMascotaComponent = ({ imagen , puntos }) => {
             // 2. Crear marcador (imagen)
             const marcador = document.createElement('div');
             marcador.className = 'w-10 h-10 bg-no-repeat bg-contain cursor-pointer rounded-full border-4 border-red-500';
-            marcador.style.backgroundImage = `url(${imagen})`;
+            marcador.style.backgroundImage = `url(${mascotas[punto.mascotaId].urlFoto})`; // Cambia la URL de la imagen según tu lógica
             marcador.style.backgroundSize = 'cover';
             marcador.style.backgroundPosition = 'center';
         
@@ -79,7 +79,7 @@ const MapMascotaComponent = ({ imagen , puntos }) => {
         map.current = null;
       }
     };
-  }, [imagen, puntos]);
+  }, [mascotas, puntos]);
 
   return (
     <div style={{width: '100%', height: '100%', position: 'relative'}}>

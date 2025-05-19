@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import MapMascotaComponent from '../components/MapMascotaComponent.jsx';
-import { obtenerMascota, obtenerListadoMascotas, obtenerUbicacionesMascota } from '../services/mascota.service.js'; 
+import { obtenerMascota, obtenerListadoMascotas, obtenerUbicacionesMascota } from '../services/mascota.service.js';
 import TablaUbicacionMascota from '../components/TablaUbicacionMascota.jsx';
 import ModalMascota from '../components/ModalMascota.jsx';
 import TarjetaMascota from '../components/TarjetaMascota.jsx';
@@ -8,10 +8,8 @@ import { MdPets } from "react-icons/md";
 import { MdMap } from "react-icons/md";
 import { MdLocationPin } from "react-icons/md";
 
-
-
 // Helper function to transform location data
-const transformarUbicacion = (ubicacion) => {
+const transformarUbicacion = (ubicacion, mascotaId) => {
   if (!ubicacion || !ubicacion.fecha) {
     console.warn("Ubicación inválida o sin fecha:", ubicacion);
     return null; // O retornar un objeto con valores por defecto/N/A
@@ -23,7 +21,8 @@ const transformarUbicacion = (ubicacion) => {
       return null; // O manejar como prefieras
     }
     return {
-      idUbicacion: ubicacion.idUbicacion, // Mantener ID si existe
+      idUbicacion: ubicacion.idUbicacion,
+      mascotaId: mascotaId, // Agregamos el ID de la mascota
       latitud: ubicacion.latitud,
       longitud: ubicacion.longitud,
       dia: fechaObj.getDate(),
@@ -41,22 +40,28 @@ const transformarUbicacion = (ubicacion) => {
 
 
 const MapaMascota = () => {
-  const [selectedMascotaId, setSelectedMascotaId] = useState(null); 
-  const [nombreMascota, setNombreMascota] = useState('');
-  const [imagenMascota, setImagenMascota] = useState('');
+  const [selectedMascotas, setSelectedMascotas] = useState([]); // Cambiamos a array de IDs
+  const [mascotasData, setMascotasData] = useState([]); // Objeto para guardar datos de mascotas
   const [listaMascotas, setListaMascotas] = useState([]);
-  const [mascotaParaModal, setMascotaParaModal] = useState(null); 
-  const [puntosActivos, setPuntosActivos] = useState([]); 
-  const [vistaActiva, setVistaActiva] = useState(null); 
-  const [zoom, setZoom] = useState(15);
-  const [cargandoUltima, setCargandoUltima] = useState(false); 
-  const [cargandoTodas, setCargandoTodas] = useState(false); 
+  const [puntosActivos, setPuntosActivos] = useState([]);
+  const [vistaActiva, setVistaActiva] = useState(null);
+  const [cargando, setCargando] = useState(false);
 
+  // Modificamos la función de selección para manejar múltiples mascotas
   const handleSeleccionarMascota = (idMascota) => {
-    console.log("TarjetaMascota seleccionada con ID:", idMascota);
-    setSelectedMascotaId(idMascota);
-    setPuntosActivos([]); 
-    setVistaActiva(null); 
+    setSelectedMascotas(prev => {
+      if (prev.includes(idMascota)) {
+        // Si ya está seleccionada, la removemos
+        return prev.filter(id => id !== idMascota);
+      } else {
+        // Si no está seleccionada, la agregamos
+        return [...prev, idMascota];
+      }
+    });
+    
+    // Limpiamos los puntos al cambiar selección
+    setPuntosActivos([]);
+    setVistaActiva(null);
   };
 
   useEffect(() => {
@@ -64,7 +69,17 @@ const MapaMascota = () => {
       console.log('Obteniendo listado de mascotas...');
       try {
         const data = await obtenerListadoMascotas();
+        console.log('Listado de mascotas:', data);
         setListaMascotas(data);
+        // Pre-cargamos datos básicos de todas las mascotas
+        const mascotasDataArray = [];
+        for (const mascota of data) {
+          mascotasDataArray[mascota.idMascota] = {
+            nombre: mascota.nombre,
+            urlFoto: mascota.urlFoto,
+          };
+        }
+        setMascotasData(mascotasDataArray);
       } catch (err) {
         console.error('Error al obtener el listado de mascotas', err);
       }
@@ -72,258 +87,178 @@ const MapaMascota = () => {
     fetchListadoMascotas();
   }, []); 
 
-  useEffect(() => {
-    const fetchDatosBasicosMascota = async () => {
-      if (!selectedMascotaId) { 
-         setNombreMascota('');
-         setImagenMascota('');
-         return;
-      }
-      
-      console.log(`Obteniendo datos básicos para mascota con ID: ${selectedMascotaId}`);
-      try {
-        const dataMascota = await obtenerMascota(selectedMascotaId);
-        setNombreMascota(dataMascota.nombre);
-        setImagenMascota(dataMascota.urlFoto);
-      } catch (err) {
-        console.error('Error al obtener datos básicos de la mascota seleccionada', err);
-         setNombreMascota('');
-         setImagenMascota('');
-      }
-    };
-
-    fetchDatosBasicosMascota();
-  }, [selectedMascotaId]); 
-
-  const cerrarModal = () => {
-    setMascotaParaModal(null); 
-  };
-
-  // Función para obtener la ÚLTIMA ubicación al presionar el botón
+  // Función para obtener la ÚLTIMA ubicación de las mascotas seleccionadas
   const handleMostrarUltimaUbicacion = async () => {
-    console.log("Botón 'Última ubicación' presionado. ID seleccionado:", selectedMascotaId); 
-
-    if (!selectedMascotaId) {
-      console.log("No hay mascota seleccionada.");
-      return; 
+    if (selectedMascotas.length === 0) {
+      console.log("No hay mascotas seleccionadas.");
+      return;
     }
 
-    setCargandoUltima(true); 
-    setVistaActiva('ultima'); 
+    setCargando(true);
+    setVistaActiva('ultima');
 
     try {
-      const responseData = await obtenerUbicacionesMascota(selectedMascotaId);
-      console.log("Respuesta completa del servicio:", responseData); 
+      const todasUbicaciones = [];
+      
+      // Obtenemos ubicaciones para cada mascota seleccionada
+      for (const mascotaId of selectedMascotas) {
+        const responseData = await obtenerUbicacionesMascota(mascotaId);
+        const ubicacionesOriginales = responseData && Array.isArray(responseData.ubicaciones) ? 
+          responseData.ubicaciones : [];
 
-      const ubicacionesOriginales = responseData && Array.isArray(responseData.ubicaciones) ? responseData.ubicaciones : [];
-
-      //ordenar las ubicaciones por fecha ascendente
-      ubicacionesOriginales.sort((a, b) => new Date(a.fecha) - new Date(b.fecha));
-
-      if (ubicacionesOriginales.length > 0) {
-        const ultimaUbicacionOriginal = ubicacionesOriginales[ubicacionesOriginales.length - 1];
-        // Transformar la última ubicación al formato esperado por la tabla
-        const ultimaUbicacionTransformada = transformarUbicacion(ultimaUbicacionOriginal);
-        
-        if (ultimaUbicacionTransformada) {
-          console.log("Última ubicación transformada:", ultimaUbicacionTransformada);
-          setPuntosActivos([ultimaUbicacionTransformada]); // Poner la ubicación transformada en el estado
-        } else {
-          console.log("No se pudo transformar la última ubicación.");
-          setPuntosActivos([]);
+        if (ubicacionesOriginales.length > 0) {
+          // Ordenamos y tomamos la última
+          ubicacionesOriginales.sort((a, b) => new Date(a.fecha) - new Date(b.fecha));
+          const ultimaUbicacion = ubicacionesOriginales[ubicacionesOriginales.length - 1];
+          const ubicacionTransformada = transformarUbicacion(ultimaUbicacion, mascotaId);
+          
+          if (ubicacionTransformada) {
+            todasUbicaciones.push(ubicacionTransformada);
+          }
         }
-      } else {
-        console.log("No se encontraron ubicaciones (array vacío o propiedad no encontrada)."); 
-        setPuntosActivos([]); 
       }
+
+      setPuntosActivos(todasUbicaciones);
     } catch (error) {
-      console.error("Error al obtener la última ubicación:", error);
-      setPuntosActivos([]); 
+      console.error("Error al obtener las últimas ubicaciones:", error);
+      setPuntosActivos([]);
     } finally {
-      setCargandoUltima(false); 
+      setCargando(false);
     }
   };
 
-  // Función para obtener TODAS las ubicaciones al presionar el botón
+  // Función para obtener TODAS las ubicaciones de las mascotas seleccionadas
   const handleMostrarTodasUbicaciones = async () => {
-    console.log("Botón 'Todas las ubicaciones' presionado. ID seleccionado:", selectedMascotaId);
-
-    if (!selectedMascotaId) {
-      console.log("No hay mascota seleccionada.");
-      return; 
+    if (selectedMascotas.length === 0) {
+      console.log("No hay mascotas seleccionadas.");
+      return;
     }
 
-    setCargandoTodas(true);
-    setVistaActiva('todas'); 
+    setCargando(true);
+    setVistaActiva('todas');
 
     try {
-      const responseData = await obtenerUbicacionesMascota(selectedMascotaId);
-      console.log("Respuesta completa del servicio:", responseData); 
-
-      const ubicacionesOriginales = responseData && Array.isArray(responseData.ubicaciones) ? responseData.ubicaciones : [];
+      const todasUbicaciones = [];
       
-      // Transformar TODAS las ubicaciones al formato esperado por la tabla
-      const ubicacionesTransformadas = ubicacionesOriginales
-        .map(transformarUbicacion) // Aplica la función de transformación a cada elemento
-        .filter(u => u !== null); // Filtra cualquier resultado nulo de la transformación
+      // Obtenemos todas las ubicaciones para cada mascota seleccionada
+      for (const mascotaId of selectedMascotas) {
+        const responseData = await obtenerUbicacionesMascota(mascotaId);
+        const ubicacionesOriginales = responseData && Array.isArray(responseData.ubicaciones) ? 
+          responseData.ubicaciones : [];
 
-      console.log("Todas las ubicaciones transformadas:", ubicacionesTransformadas);
-      setPuntosActivos(ubicacionesTransformadas); // Poner las ubicaciones transformadas en el estado
+        const ubicacionesTransformadas = ubicacionesOriginales
+          .map(ubicacion => transformarUbicacion(ubicacion, mascotaId))
+          .filter(u => u !== null);
 
-      if (ubicacionesTransformadas.length === 0 && ubicacionesOriginales.length > 0) {
-         console.warn("Se recibieron ubicaciones pero no se pudieron transformar.");
-      } else if (ubicacionesOriginales.length === 0) {
-         console.log("No se encontraron ubicaciones (array vacío o propiedad no encontrada).");
+        todasUbicaciones.push(...ubicacionesTransformadas);
       }
 
+      setPuntosActivos(todasUbicaciones);
     } catch (error) {
       console.error("Error al obtener todas las ubicaciones:", error);
-      setPuntosActivos([]); 
+      setPuntosActivos([]);
     } finally {
-      setCargandoTodas(false);
+      setCargando(false);
     }
   };
 
-  const handleZoomIn = () => {
-    setZoom(prev => Math.min(prev + 1, 18));
-  };
-
-  const handleZoomOut = () => {
-    setZoom(prev => Math.max(prev - 1, 10));
+  // Función para obtener nombres de mascotas seleccionadas
+  const getNombresMascotasSeleccionadas = () => {
+    return selectedMascotas.map(id => mascotasData[id]?.nombre || 'Mascota').join(', ');
   };
 
   return (
-    <div className="flex flex-col min-h-screen md:min-h-170 md:h-[95vh]  p-2 md:pt-2 " 
-    style={{
-      backgroundImage: `linear-gradient(rgba(255, 255, 255, 1), rgba(255, 255, 255, 0.3)), url('/assets/gps_background.png')`,
-      backgroundSize: 'cover',
-      backgroundPosition: 'bottom',
-    }}>
+    <div className="flex flex-col min-h-screen md:min-h-170 md:h-[95vh] p-2 md:pt-2"
+      style={{
+        backgroundImage: `linear-gradient(rgba(255, 255, 255, 1), rgba(255, 255, 255, 0.3)), url('/assets/gps_background.png')`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'bottom',
+      }}>
       <div className="h-full flex justify-center">
         {/* Mitad izquierda - listado de mascotas */}
         <div className='flex flex-col md:flex-row w-full md:w-4/5 md:justify-center rounded-2xl shadow-xl bg-blue-600/10 p-2'>
-          <div className="flex flex-col  md:w-2/5  rounded-2xl ">
-            <div className="flex flex-col flex-5/6  p-4 rounded-lg shadow-xl ">
-            
+          <div className="flex flex-col md:w-2/5 rounded-2xl">
+            <div className="flex flex-col flex-5/6 p-4 rounded-lg shadow-xl">
               <div className='flex justify-center items-center gap-3 pb-3'>
                 <MdPets />
                 <h2 className="text-xl font-semibold">Mis Mascotas</h2>
               </div>
               <div className="md:h-[95%] overflow-y-auto md:max-h-130 max-h-50">
                 {listaMascotas.map((mascota) => (
-                  <TarjetaMascota 
-                    key={mascota.idMascota} 
-                    idMascota={mascota.idMascota} 
-                    onSeleccionar={handleSeleccionarMascota} 
-                    seleccionada={selectedMascotaId === mascota.idMascota} 
+                  <TarjetaMascota
+                    key={mascota.idMascota}
+                    idMascota={mascota.idMascota}
+                    onSeleccionar={handleSeleccionarMascota}
+                    seleccionada={selectedMascotas.includes(mascota.idMascota)}
                   />
                 ))}
               </div>
             </div>
-            <div className=' flex-1/6 '/> {/* Para el espacio despues del listado de mascotas */}
+            <div className='flex-1/6' />
           </div>
 
           {/* Mitad derecha - mapa y controles */}
-          {selectedMascotaId ? ( 
+          {selectedMascotas.length > 0 ? (
             <div className="md:ml-2 md:w-4/5 flex flex-col p-4 h-200 md:h-150 shadow-xl rounded-2xl">
               <div className='flex items-center justify-center gap-3 mb-3'>
                 <MdMap />
-                <h2 className="text-xl font-semibold  ">Mapa de ubicaciones</h2>
+                <h2 className="text-xl font-semibold">Mapa de ubicaciones</h2>
               </div>
+              
               {/* Contenedor del mapa */}
-              <div className="max-h-70 w-full px-5 h-full ">
-                {/* MapMascotaComponent probablemente espera latitud/longitud, así que no necesita la transformación */}
-                <MapMascotaComponent 
-                  imagen={imagenMascota} 
-                  // Pasar los puntos transformados (que aún tienen lat/lon)
-                  puntos={puntosActivos} 
-                  zoom={zoom}
-                  key={selectedMascotaId} 
+              <div className="max-h-70 w-full px-5 h-full">
+                <MapMascotaComponent
+                  // Pasamos todas las imágenes de las mascotas seleccionadas
+                  mascotas={mascotasData}
+                  puntos={puntosActivos}
+                  key={selectedMascotas.join(',')} // Actualizamos la key cuando cambian las selecciones
                 />
               </div>
 
               {/* Controles debajo del mapa */}
-              <div className="w-full px-5 py-4 flex justify-between items-center h-fit ">
+              <div className="w-full px-5 py-4 flex justify-between items-center h-fit">
                 {/* Botones de control de ubicaciones */}
-                <div className="flex justify-around w-full  ">
+                <div className="flex justify-around w-full">
                   <button
                     onClick={handleMostrarUltimaUbicacion}
-                    disabled={!selectedMascotaId || cargandoUltima || cargandoTodas} 
-                    className={`px-4 py-2 rounded-md shadow ${vistaActiva === 'ultima' ? 'bg-blue-500 text-white' : 'bg-white hover:bg-gray-100'} ${(!selectedMascotaId || cargandoUltima || cargandoTodas) ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    disabled={selectedMascotas.length === 0 || cargando}
+                    className={`px-4 py-2 rounded-md shadow ${vistaActiva === 'ultima' ? 'bg-blue-500 text-white' : 'bg-white hover:bg-gray-100'} ${(selectedMascotas.length === 0 || cargando) ? 'opacity-50 cursor-not-allowed' : ''}`}
                   >
-                    {cargandoUltima ? 'Cargando...' : 'Última ubicación'} 
+                    {cargando ? 'Cargando...' : 'Última ubicación'}
                   </button>
                   <button
                     onClick={handleMostrarTodasUbicaciones}
-                    disabled={!selectedMascotaId || cargandoUltima || cargandoTodas} 
-                    className={`px-4 py-2 rounded-md shadow ${vistaActiva === 'todas' ? 'bg-blue-500 text-white' : 'bg-white hover:bg-gray-100'} ${(!selectedMascotaId || cargandoUltima || cargandoTodas) ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    disabled={selectedMascotas.length === 0 || cargando}
+                    className={`px-4 py-2 rounded-md shadow ${vistaActiva === 'todas' ? 'bg-blue-500 text-white' : 'bg-white hover:bg-gray-100'} ${(selectedMascotas.length === 0 || cargando) ? 'opacity-50 cursor-not-allowed' : ''}`}
                   >
-                    {cargandoTodas ? 'Cargando...' : 'Todas las ubicaciones'}
+                    {cargando ? 'Cargando...' : 'Todas las ubicaciones'}
                   </button>
                 </div>
-                
-                {/* Controles de zoom */}
-                {/*<div className="flex space-x-2">
-                  <button 
-                    onClick={handleZoomOut}
-                    className="bg-white p-2 rounded-md shadow hover:bg-gray-100"
-                    title="Alejar"
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                      <path fillRule="evenodd" d="M5 10a1 1 0 011-1h8a1 1 0 110 2H6a1 1 0 01-1-1z" clipRule="evenodd" />
-                    </svg>
-                  </button>
-                  <button 
-                    onClick={handleZoomIn}
-                    className="bg-white p-2 rounded-md shadow hover:bg-gray-100"
-                    title="Acercar"
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                      <path fillRule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clipRule="evenodd" />
-                    </svg>
-                  </button>
-                </div>*/}
               </div>
 
               {/* Tabla de ubicaciones */}
               <div className="w-full shadow-2xl">
                 <div className='flex items-center justify-center gap-3 mb-3'>
                   <MdLocationPin />
-                  <h2 className="text-xl font-semibold ">Ubicaciones de {nombreMascota || 'mascota seleccionada'}</h2>
+                  <h2 className="text-xl font-semibold">
+                    Ubicaciones de {getNombresMascotasSeleccionadas() || 'mascotas seleccionadas'}
+                  </h2>
                 </div>
                 
                 {/* Pasar los puntos YA TRANSFORMADOS a la tabla */}
-                <TablaUbicacionMascota datos={puntosActivos} /> 
+                <TablaUbicacionMascota 
+                  datos={puntosActivos} 
+                  mascotas={mascotasData} // Pasamos los datos de las mascotas para mostrar nombres
+                />
               </div>
             </div>
-            
           ) : (
             <div className="flex p-8 w-1/2 h-full flex items-center justify-center text-gray-900">
-              <p>Selecciona una mascota de la lista.</p> 
+              <p>Selecciona una o más mascotas de la lista.</p>
             </div>
           )}
         </div>
       </div>
-       {mascotaParaModal && 
-          <ModalMascota 
-            idMascota={mascotaParaModal} 
-            closeModal={cerrarModal} 
-            onMascotaActualizada={() => {
-                // Recargar las mascotas después de una actualización
-                const cargarMascotas = async () => {
-                  setLoadingMascotas(true);
-                  try {
-                    const response = await obtenerListadoMascotas();
-                    setMascotas(response);
-                  } catch (error) {
-                    console.error('Error al cargar mascotas:', error);
-                    setErrorMascotas('Error al cargar las mascotas');
-                  }
-                  setLoadingMascotas(false);
-                };
-                cargarMascotas();
-              }}
-          />} 
        
     </div>
   );
