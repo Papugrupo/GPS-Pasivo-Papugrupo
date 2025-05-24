@@ -51,8 +51,9 @@ const MapMascotaComponent = ({ mascotas , puntos, ultimaUbicacionGlobal }) => {
         
             // 2. Crear marcador (imagen)
             const marcador = document.createElement('div');
+            const urlFoto = mascotas[punto.mascotaId]?.urlFoto || '/assets/mascotaPorDefecto.png';
             marcador.className = 'w-10 h-10 bg-no-repeat bg-contain cursor-pointer rounded-full border-4 border-red-500';
-            marcador.style.backgroundImage = `url(${mascotas[punto.mascotaId].urlFoto})`; // Cambia la URL de la imagen según tu lógica
+            marcador.style.backgroundImage = `url(${urlFoto})`;
             marcador.style.backgroundSize = 'cover';
             marcador.style.backgroundPosition = 'center';
         
