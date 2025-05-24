@@ -2,7 +2,7 @@ import React, { useEffect, useRef } from 'react';
 import maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 
-const MapMascotaComponent = ({ mascotas , puntos }) => {
+const MapMascotaComponent = ({ mascotas , puntos, ultimaUbicacionGlobal }) => {
   const mapContainer = useRef(null);
   const map = useRef(null);
   
@@ -12,15 +12,23 @@ const MapMascotaComponent = ({ mascotas , puntos }) => {
   useEffect(() => {
     if (mapContainer.current && !map.current) {
       console.log("Inicializando mapa...");
-      
+
       try {
         // Especificar la URL del estilo correctamente
         const styleUrl = `https://api.maptiler.com/maps/streets/style.json?key=${apiKey}`;
         
+        console.log("ultimaUbicacionGlobal", ultimaUbicacionGlobal);
+        const ubicacionCentro = ultimaUbicacionGlobal || {
+          latitud: -35.41963979516562,
+          longitud: -71.6741795041245,
+        };
+
+        
+
         map.current = new maplibregl.Map({
           container: mapContainer.current,
           style: styleUrl, // URL completa al archivo style.json con la API key
-          center: [-71.23025198746762, -35.00155919995224], 
+          center: [ubicacionCentro.longitud, ubicacionCentro.latitud], 
           zoom: 9
         });
         
