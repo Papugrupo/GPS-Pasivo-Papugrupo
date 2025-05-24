@@ -74,3 +74,57 @@ export const obtenerUbicacionesMascota = async (idMascota) => {
         throw error;
     }
 }
+
+export const actualizarMascota = async (idMascota, datosMascota) => {
+    try {
+      // Normalizar todos los campos string para que sean "" en lugar de null/undefined
+      const datosNormalizados = {
+        nombre: datosMascota.nombre || "",
+        especie: datosMascota.especie || "",
+        raza: datosMascota.raza || "",
+        sexo: datosMascota.sexo || "",
+        color: datosMascota.color || "",
+        tamano: datosMascota.tamano || "",
+        numeroMicrochip: datosMascota.numeroMicrochip || "",
+        condicionesMedicas: datosMascota.condicionesMedicas || "",
+        nombreVeterinario: datosMascota.nombreVeterinario || "",
+        telefonoVeterinario: datosMascota.telefonoVeterinario || "",
+        comportamiento: datosMascota.comportamiento || "",
+        observaciones: datosMascota.observaciones || "",
+        urlFoto: datosMascota.urlFoto || "",
+        
+        // Campos booleanos
+        esterilizado: Boolean(datosMascota.esterilizado),
+        vacunasAlDia: Boolean(datosMascota.vacunasAlDia),
+        
+        // Campos de fecha (convertir a string vacío si son null)
+        fechaNacimiento: datosMascota.fechaNacimiento 
+          ? new Date(datosMascota.fechaNacimiento).toISOString() 
+          : "",
+        fechaMicrochip: datosMascota.fechaMicrochip 
+          ? new Date(datosMascota.fechaMicrochip).toISOString() 
+          : "",
+        fechaDesparasitacion: datosMascota.fechaDesparasitacion 
+          ? new Date(datosMascota.fechaDesparasitacion).toISOString() 
+          : ""
+      };
+  
+      const response = await axiosAuth.put(
+        `/api/pet/actualizar-mascota/${idMascota}`, 
+        datosNormalizados,
+        {
+          headers: {
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+      
+      return response.data;
+    } catch (error) {
+      const errorMessage = error.response?.data?.message || 
+                          error.message || 
+                          'Error al actualizar la mascota';
+      console.error('Error en actualizarMascota:', errorMessage);
+      throw new Error(errorMessage);
+    }
+  };

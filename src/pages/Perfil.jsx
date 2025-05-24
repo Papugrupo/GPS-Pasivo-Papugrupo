@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { actualizarUsuario, obtenerUsuario } from '../services/usuario.service';
 import { obtenerListadoMascotas } from '../services/mascota.service';
+import ModalMascota from '../components/ModalMascota.jsx';
 
 const Perfil = () => {
   const { user } = useAuth();
@@ -10,13 +11,17 @@ const Perfil = () => {
     email: '',
     telefono: '',
     direccion: ''
-  });
+  }); 
   const [editando, setEditando] = useState(false);
   const [mensaje, setMensaje] = useState('');
 
   const [mascotas, setMascotas] = useState([]);
   const [loadingMascotas, setLoadingMascotas] = useState(false);
   const [errorMascotas, setErrorMascotas] = useState(null);
+  
+  // Estado para controlar el modal de mascotas
+  const [modalMascotaVisible, setModalMascotaVisible] = useState(false);
+  const [mascotaSeleccionada, setMascotaSeleccionada] = useState(null);
 
   useEffect(() => {
     const cargarDatosUsuario = async () => {
@@ -26,7 +31,7 @@ const Perfil = () => {
           const datos = await obtenerUsuario(user.email);
           setUsuario(datos);
 
-          // Aquí podrías cargar las mascotas del usuario si es necesario
+          // Cargar las mascotas del usuario
           setLoadingMascotas(true);
           const response = await obtenerListadoMascotas();
           setMascotas(response);
@@ -35,6 +40,7 @@ const Perfil = () => {
       } catch (error) {
         console.error('Error al cargar datos del usuario:', error);
         setLoadingMascotas(false);
+        setErrorMascotas('Error al cargar las mascotas');
       }
     };
     
@@ -59,8 +65,20 @@ const Perfil = () => {
     }
   };
 
+  // Función para abrir el modal de la mascota
+  const abrirModalMascota = (mascota) => {
+    setMascotaSeleccionada(mascota);
+    setModalMascotaVisible(true);
+  };
+
+  // Función para cerrar el modal
+  const cerrarModalMascota = () => {
+    setModalMascotaVisible(false);
+    setMascotaSeleccionada(null);
+  };
+
   return (
-    <div className="min-h-screen bg-gray-100 p-6">
+    <div className="min-h-screen bg-[url('/assets/fondo.png')] p-6">
       <div className="max-w-4xl mx-auto bg-white rounded-lg shadow-md overflow-hidden">
         {/* Encabezado del perfil */}
         <div className="bg-[#e0ecfc] p-6 text-gray-800 flex items-center"> 
@@ -181,18 +199,39 @@ const Perfil = () => {
           )}
         </div>
 
-        {/* Sección de mascotas (opcional) */}
+        {/* Sección de mascotas */}
         <div className="border-t p-6">
           <h2 className="text-xl font-semibold mb-4">Mis Mascotas</h2>
           {loadingMascotas ? (
-            <div className = "text-center py-4">
+            <div className="text-center py-4">
               <p>Cargando mascotas...</p>
+            </div>
+          ) : errorMascotas ? (
+            <div className="text-center py-4 text-red-500">
+              <p>{errorMascotas}</p>
             </div>
           ) : mascotas.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {mascotas.map((mascota) => (
-                <div key={mascota.idMascota} className="bg-white p-4 rounded shadow-md">
-                  <h3 className="text-lg font-semibold">{mascota.nombre}</h3>
+                <div 
+                  key={mascota.idMascota} 
+                  className="bg-white p-4 rounded shadow-md cursor-pointer hover:shadow-lg transition-shadow"
+                  onClick={() => abrirModalMascota(mascota)}
+                >
+                  <div className="flex items-center mb-3">
+                    {mascota.urlFoto ? (
+                      <img 
+                        src={mascota.urlFoto} 
+                        alt={mascota.nombre} 
+                        className="w-16 h-16 rounded-full object-cover mr-3"
+                      />
+                    ) : (
+                      <div className="w-16 h-16 rounded-full bg-gray-200 flex items-center justify-center mr-3">
+                        <span className="text-gray-500">Foto</span>
+                      </div>
+                    )}
+                    <h3 className="text-lg font-semibold">{mascota.nombre}</h3>
+                  </div>
                   <p className="text-gray-600">Especie: {mascota.especie}</p>
                   <p className="text-gray-600">Raza: {mascota.raza}</p>
                 </div>
@@ -203,6 +242,30 @@ const Perfil = () => {
           )}
         </div>
       </div>
+
+      {/* Modal de mascota */}
+      {modalMascotaVisible && mascotaSeleccionada && (
+      // En Perfil.js, modificar la llamada al ModalMascota
+        <ModalMascota 
+          idMascota={mascotaSeleccionada.idMascota} 
+          closeModal={cerrarModalMascota}
+          onMascotaActualizada={() => {
+            // Recargar las mascotas después de una actualización
+            const cargarMascotas = async () => {
+              setLoadingMascotas(true);
+              try {
+                const response = await obtenerListadoMascotas();
+                setMascotas(response);
+              } catch (error) {
+                console.error('Error al cargar mascotas:', error);
+                setErrorMascotas('Error al cargar las mascotas');
+              }
+              setLoadingMascotas(false);
+            };
+            cargarMascotas();
+          }}
+        />
+      )}
     </div>
   );
 };

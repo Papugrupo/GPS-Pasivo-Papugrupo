@@ -14,6 +14,8 @@ const ReportarMascota = () => {
         raza: '',
         edad: '',
         imagenBase64: '',
+        nombreDueno: '',
+        telefonoDueno: '' 
     });
 
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -35,6 +37,8 @@ const ReportarMascota = () => {
                 raza: data.raza || '',
                 edad: edadCalculada,
                 imagenBase64: data.urlFoto || '',
+                nombreDueno: data.nombreDueno || '',  // Nuevos campos
+                telefonoDueno: data.telefonoDueno || ''
             }));
 
         } catch (err) {
@@ -208,6 +212,29 @@ const ReportarMascota = () => {
                             {submitError}
                         </div>
                     )}
+                    </div>
+                    <div className="text-center text-gray-600 font-semibold pt-4">
+                        Información del Dueño
+                    </div>
+                    <div className='flex flex-row items-center w-full'>
+                        <p className='w-1/4'>Nombre</p>
+                        <input
+                            type="text"
+                            name="nombreDueno"
+                            value={formData.nombreDueno}
+                            disabled
+                            className="w-full p-2 border rounded-lg bg-gray-100 text-gray-500"
+                        />
+                    </div>
+                    <div className='flex flex-row items-center w-full'>
+                        <p className='w-1/4'>Teléfono</p>
+                        <input
+                            type="text"
+                            name="telefonoDueno"
+                            value={formData.telefonoDueno}
+                            disabled
+                            className="w-full p-2 border rounded-lg bg-gray-100 text-gray-500"
+                        />
                     </div>
                 </form>
             </div>
