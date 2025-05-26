@@ -38,7 +38,6 @@ const transformarUbicacion = (ubicacion, mascotaId) => {
   }
 };
 
-
 const MapaMascota = () => {
   const [selectedMascotas, setSelectedMascotas] = useState([]); // Cambiamos a array de IDs
   const [mascotasData, setMascotasData] = useState([]); // Objeto para guardar datos de mascotas
@@ -46,62 +45,44 @@ const MapaMascota = () => {
   const [puntosActivos, setPuntosActivos] = useState([]);
   const [vistaActiva, setVistaActiva] = useState(null);
   const [cargando, setCargando] = useState(false);
+  const [ultimaUbicacionGlobal, setUltimaUbicacionGlobal] = useState(null);
 
   // Modificamos la función de selección para manejar múltiples mascotas
-  const handleSeleccionarMascota = (idMascota) => {
-    setSelectedMascotas(prev => {
-      if (prev.includes(idMascota)) {
-        // Si ya está seleccionada, la removemos
-        return prev.filter(id => id !== idMascota);
-      } else {
-        // Si no está seleccionada, la agregamos
-        return [...prev, idMascota];
-      }
-    });
-    
-    // Limpiamos los puntos al cambiar selección
+  const handleSeleccionarMascota = async (idMascota) => {
+    setSelectedMascotas(prev => prev.includes(idMascota)
+      ? prev.filter(id => id !== idMascota)
+      : [...prev, idMascota]
+    );
     setPuntosActivos([]);
     setVistaActiva(null);
+
   };
 
   useEffect(() => {
-    const fetchListadoMascotas = async () => {
-      console.log('Obteniendo listado de mascotas...');
-      try {
-        const data = await obtenerListadoMascotas();
-        console.log('Listado de mascotas:', data);
-        setListaMascotas(data);
-        // Pre-cargamos datos básicos de todas las mascotas
-        const mascotasDataArray = [];
-        for (const mascota of data) {
-          mascotasDataArray[mascota.idMascota] = {
-            nombre: mascota.nombre,
-            urlFoto: mascota.urlFoto,
-          };
-        }
-        setMascotasData(mascotasDataArray);
-      } catch (err) {
-        console.error('Error al obtener el listado de mascotas', err);
-      }
+    const actualizarUbicaciones = async () => {
+      if (!selectedMascotas.length) return;
+
+      const ubicaciones = await obtenerUltimasUbicaciones(selectedMascotas);
+      ubicaciones.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
+      setUltimaUbicacionGlobal(ubicaciones[ubicaciones.length - 1]);
+      setPuntosActivos(ubicaciones);
     };
-    fetchListadoMascotas();
-  }, []); 
 
-  // Función para obtener la ÚLTIMA ubicación de las mascotas seleccionadas
-  const handleMostrarUltimaUbicacion = async () => {
-    if (selectedMascotas.length === 0) {
-      console.log("No hay mascotas seleccionadas.");
-      return;
+    actualizarUbicaciones();
+  }, [selectedMascotas]);
+
+  // Función para obtener la ÚLTIMA ubicación de mascotas específicas
+  const obtenerUltimasUbicaciones = async (mascotasIds) => {
+    if (mascotasIds.length === 0) {
+      console.log("No hay mascotas para procesar.");
+      return [];
     }
-
-    setCargando(true);
-    setVistaActiva('ultima');
 
     try {
       const todasUbicaciones = [];
       
-      // Obtenemos ubicaciones para cada mascota seleccionada
-      for (const mascotaId of selectedMascotas) {
+      // Obtenemos ubicaciones para cada mascota
+      for (const mascotaId of mascotasIds) {
         const responseData = await obtenerUbicacionesMascota(mascotaId);
         const ubicacionesOriginales = responseData && Array.isArray(responseData.ubicaciones) ? 
           responseData.ubicaciones : [];
@@ -116,15 +97,74 @@ const MapaMascota = () => {
             todasUbicaciones.push(ubicacionTransformada);
           }
         }
+        
+        // Guardamos la última ubicación global con la mas reciente de todasUbicaciones
+        if (todasUbicaciones.length > 0) {
+          todasUbicaciones.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
+          setUltimaUbicacionGlobal(todasUbicaciones[todasUbicaciones.length - 1]);
+        }
       }
 
-      setPuntosActivos(todasUbicaciones);
+      return todasUbicaciones;
     } catch (error) {
       console.error("Error al obtener las últimas ubicaciones:", error);
-      setPuntosActivos([]);
-    } finally {
-      setCargando(false);
+      return [];
     }
+  };
+
+  useEffect(() => {
+    const fetchListadoMascotas = async () => {
+      console.log('Obteniendo listado de mascotas...');
+      try {
+        const data = await obtenerListadoMascotas();
+        console.log('Listado de mascotas:', data);
+        setListaMascotas(data);
+
+        // Guardamos los datos de las mascotas
+        const mascotasDataArray = [];
+        const ids = [];
+        for (const mascota of data) {
+          ids.push(mascota.idMascota);
+          mascotasDataArray[mascota.idMascota] = {
+            nombre: mascota.nombre,
+            urlFoto: mascota.urlFoto,
+          };
+        }
+
+        setMascotasData(mascotasDataArray);
+        setSelectedMascotas(ids); // Seleccionamos todas las mascotas
+
+        // Ahora obtenemos y mostramos automáticamente las últimas ubicaciones
+        if (ids.length > 0) {
+          setCargando(true);
+          setVistaActiva('ultima');
+          
+          const ubicaciones = await obtenerUltimasUbicaciones(ids);
+          setPuntosActivos(ubicaciones);
+          setCargando(false);
+        }
+      } catch (err) {
+        console.error('Error al obtener el listado de mascotas', err);
+        setCargando(false);
+      }
+    };
+
+    fetchListadoMascotas();
+  }, []);
+
+  // Función para obtener la ÚLTIMA ubicación de las mascotas seleccionadas
+  const handleMostrarUltimaUbicacion = async () => {
+    if (selectedMascotas.length === 0) {
+      console.log("No hay mascotas seleccionadas.");
+      return;
+    }
+
+    setCargando(true);
+    setVistaActiva('ultima');
+
+    const ubicaciones = await obtenerUltimasUbicaciones(selectedMascotas);
+    setPuntosActivos(ubicaciones);
+    setCargando(false);
   };
 
   // Función para obtener TODAS las ubicaciones de las mascotas seleccionadas
@@ -168,100 +208,159 @@ const MapaMascota = () => {
   };
 
   return (
-    <div className="flex flex-col min-h-screen md:min-h-170 md:h-[95vh] p-2 md:pt-2"
+    <div
+      className="min-h-screen bg-cover bg-bottom p-2 md:p-4"
       style={{
-        backgroundImage: `linear-gradient(rgba(255, 255, 255, 1), rgba(255, 255, 255, 0.3)), url('/assets/gps_background.png')`,
-        backgroundSize: 'cover',
-        backgroundPosition: 'bottom',
-      }}>
-      <div className="h-full flex justify-center">
-        {/* Mitad izquierda - listado de mascotas */}
-        <div className='flex flex-col md:flex-row w-full md:w-4/5 md:justify-center rounded-2xl shadow-xl bg-blue-600/10 p-2'>
-          <div className="flex flex-col md:w-2/5 rounded-2xl">
-            <div className="flex flex-col flex-5/6 p-4 rounded-lg shadow-xl">
-              <div className='flex justify-center items-center gap-3 pb-3'>
-                <MdPets />
-                <h2 className="text-xl font-semibold">Mis Mascotas</h2>
+        backgroundImage: `linear-gradient(rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.3)), url('/assets/gps_background.png')`,
+      }}
+    >
+      <div className="container mx-auto max-w-full">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
+          {/* Sección izquierda - Listado de mascotas */}
+          <div className="lg:col-span-1">
+            <div className="bg-white rounded-2xl shadow-xl p-4 h-full">
+              <div className="flex justify-center items-center gap-2 mb-4">
+                <MdPets className="text-lg text-blue-600" />
+                <h2 className="text-lg font-bold text-gray-800">Mis Mascotas</h2>
               </div>
-              <div className="md:h-[95%] overflow-y-auto md:max-h-130 max-h-50">
-                {listaMascotas.map((mascota) => (
-                  <TarjetaMascota
-                    key={mascota.idMascota}
-                    idMascota={mascota.idMascota}
-                    onSeleccionar={handleSeleccionarMascota}
-                    seleccionada={selectedMascotas.includes(mascota.idMascota)}
-                  />
-                ))}
+
+              <div className="space-y-2 max-h-[calc(100vh-350px)] overflow-y-auto pr-1">
+                {listaMascotas.length === 0 ? (
+                  <div className="text-center py-8 text-gray-500">
+                    <MdPets className="text-4xl mx-auto mb-3 text-gray-300" />
+                    <p className="text-base">No tienes mascotas registradas</p>
+                  </div>
+                ) : (
+                  listaMascotas.map((mascota) => (
+                    <TarjetaMascota
+                      key={mascota.idMascota}
+                      idMascota={mascota.idMascota}
+                      onSeleccionar={handleSeleccionarMascota}
+                      seleccionada={selectedMascotas.includes(mascota.idMascota)}
+                    />
+                  ))
+                )}
               </div>
             </div>
-            <div className='flex-1/6' />
           </div>
 
-          {/* Mitad derecha - mapa y controles */}
-          {selectedMascotas.length > 0 ? (
-            <div className="md:ml-2 md:w-4/5 flex flex-col p-4 h-200 md:h-150 shadow-xl rounded-2xl">
-              <div className='flex items-center justify-center gap-3 mb-3'>
-                <MdMap />
-                <h2 className="text-xl font-semibold">Mapa de ubicaciones</h2>
-              </div>
-              
-              {/* Contenedor del mapa */}
-              <div className="max-h-70 w-full px-5 h-full">
-                <MapMascotaComponent
-                  // Pasamos todas las imágenes de las mascotas seleccionadas
-                  mascotas={mascotasData}
-                  puntos={puntosActivos}
-                  key={selectedMascotas.join(',')} // Actualizamos la key cuando cambian las selecciones
-                />
+          {/* Sección central - Mapa */}
+          <div className="lg:col-span-2">
+            <div className="bg-white rounded-2xl shadow-xl p-4 flex flex-col">
+              <div className="flex items-center justify-center gap-2 mb-4">
+                <MdMap className="text-lg text-green-600" />
+                <h2 className="text-lg font-bold text-gray-800">Mapa de Ubicaciones</h2>
               </div>
 
-              {/* Controles debajo del mapa */}
-              <div className="w-full px-5 py-4 flex justify-between items-center h-fit">
-                {/* Botones de control de ubicaciones */}
-                <div className="flex justify-around w-full">
-                  <button
-                    onClick={handleMostrarUltimaUbicacion}
-                    disabled={selectedMascotas.length === 0 || cargando}
-                    className={`px-4 py-2 rounded-md shadow ${vistaActiva === 'ultima' ? 'bg-blue-500 text-white' : 'bg-white hover:bg-gray-100'} ${(selectedMascotas.length === 0 || cargando) ? 'opacity-50 cursor-not-allowed' : ''}`}
-                  >
-                    {cargando ? 'Cargando...' : 'Última ubicación'}
-                  </button>
-                  <button
-                    onClick={handleMostrarTodasUbicaciones}
-                    disabled={selectedMascotas.length === 0 || cargando}
-                    className={`px-4 py-2 rounded-md shadow ${vistaActiva === 'todas' ? 'bg-blue-500 text-white' : 'bg-white hover:bg-gray-100'} ${(selectedMascotas.length === 0 || cargando) ? 'opacity-50 cursor-not-allowed' : ''}`}
-                  >
-                    {cargando ? 'Cargando...' : 'Todas las ubicaciones'}
-                  </button>
+              {selectedMascotas.length > 0 ? (
+                <>
+                  {/* Mapa con altura optimizada */}
+                  <div className="h-[280px] md:h-[320px] lg:h-[360px] w-full rounded-xl overflow-hidden shadow-md border border-gray-200">
+                    <MapMascotaComponent
+                      mascotas={mascotasData}
+                      puntos={puntosActivos}
+                      key={selectedMascotas.join(',')}
+                      ultimaUbicacionGlobal = {ultimaUbicacionGlobal}
+                    />
+                  </div>
+
+                  {/* Botones mejorados */}
+                  <div className="flex flex-col sm:flex-row justify-center gap-3 mt-4">
+                    <button
+                      onClick={handleMostrarUltimaUbicacion}
+                      disabled={selectedMascotas.length === 0 || cargando}
+                      className={`px-4 py-2 rounded-lg font-medium shadow-md transition-all duration-200 transform hover:scale-105 ${
+                        vistaActiva === 'ultima'
+                          ? 'bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-blue-300'
+                          : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-200'
+                      } ${selectedMascotas.length === 0 || cargando ? 'opacity-50 cursor-not-allowed transform-none' : ''}`}
+                    >
+                      {cargando && vistaActiva === 'ultima' ? (
+                        <div className="flex items-center gap-2">
+                          <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                          <span className="text-sm">Cargando...</span>
+                        </div>
+                      ) : (
+                        <span className="text-sm">Última Ubicación</span>
+                      )}
+                    </button>
+                    <button
+                      onClick={handleMostrarTodasUbicaciones}
+                      disabled={selectedMascotas.length === 0 || cargando}
+                      className={`px-4 py-2 rounded-lg font-medium shadow-md transition-all duration-200 transform hover:scale-105 ${
+                        vistaActiva === 'todas'
+                          ? 'bg-gradient-to-r from-green-600 to-green-700 text-white shadow-green-300'
+                          : 'bg-white text-gray-700 hover:bg-gray-50 border border-gray-200'
+                      } ${selectedMascotas.length === 0 || cargando ? 'opacity-50 cursor-not-allowed transform-none' : ''}`}
+                    >
+                      {cargando && vistaActiva === 'todas' ? (
+                        <div className="flex items-center gap-2">
+                          <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                          <span className="text-sm">Cargando...</span>
+                        </div>
+                      ) : (
+                        <span className="text-sm">Todas las Ubicaciones</span>
+                      )}
+                    </button>
+                  </div>
+                </>
+              ) : (
+                <div className="h-[280px] md:h-[320px] lg:h-[360px] flex items-center justify-center">
+                  <div className="text-center p-8 text-gray-600">
+                    <MdMap className="text-5xl mx-auto mb-4 text-gray-300" />
+                    <h3 className="text-lg font-semibold mb-2">
+                      {listaMascotas.length > 0
+                        ? 'Selecciona una o más mascotas'
+                        : 'No hay mascotas disponibles'}
+                    </h3>
+                    <p className="text-sm text-gray-500">
+                      {listaMascotas.length > 0
+                        ? 'Elige las mascotas que deseas ver en el mapa'
+                        : 'Registra mascotas para poder visualizar sus ubicaciones'}
+                    </p>
+                  </div>
                 </div>
+              )}
+            </div>
+          </div>
+
+          {/* Sección derecha - Tabla de ubicaciones */}
+          <div className="lg:col-span-1">
+            <div className="bg-white rounded-2xl shadow-xl p-4 h-full flex flex-col">
+              <div className="flex items-center justify-center gap-2 mb-4">
+                <MdLocationPin className="text-lg text-red-600" />
+                <h2 className="text-lg font-bold text-gray-800 text-center">
+                  Ubicaciones
+                </h2>
               </div>
 
-              {/* Tabla de ubicaciones */}
-              <div className="w-full shadow-2xl">
-                <div className='flex items-center justify-center gap-3 mb-3'>
-                  <MdLocationPin />
-                  <h2 className="text-xl font-semibold">
-                    Ubicaciones de {getNombresMascotasSeleccionadas() || 'mascotas seleccionadas'}
-                  </h2>
+              {selectedMascotas.length > 0 ? (
+                <>
+                  <div className="mb-3 p-2 bg-gray-50 rounded-lg">
+                    <p className="text-xs text-gray-600 font-medium text-center">
+                      {getNombresMascotasSeleccionadas()}
+                    </p>
+                  </div>
+
+                  <div className="flex-1 overflow-y-auto max-h-[calc(100vh-350px)]">
+                    <TablaUbicacionMascota datos={puntosActivos} mascotas={mascotasData} />
+                  </div>
+                </>
+              ) : (
+                <div className="flex-1 flex items-center justify-center">
+                  <div className="text-center text-gray-500">
+                    <MdLocationPin className="text-4xl mx-auto mb-3 text-gray-300" />
+                    <p className="text-sm">Selecciona mascotas para ver sus ubicaciones</p>
+                  </div>
                 </div>
-                
-                {/* Pasar los puntos YA TRANSFORMADOS a la tabla */}
-                <TablaUbicacionMascota 
-                  datos={puntosActivos} 
-                  mascotas={mascotasData} // Pasamos los datos de las mascotas para mostrar nombres
-                />
-              </div>
+              )}
             </div>
-          ) : (
-            <div className="flex p-8 w-1/2 h-full flex items-center justify-center text-gray-900">
-              <p>Selecciona una o más mascotas de la lista.</p>
-            </div>
-          )}
+          </div>
         </div>
       </div>
-       
     </div>
   );
+
 };
 
 export default MapaMascota;

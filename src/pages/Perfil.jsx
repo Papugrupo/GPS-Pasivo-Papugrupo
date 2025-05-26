@@ -78,7 +78,7 @@ const Perfil = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 p-6">
+    <div className="min-h-screen bg-[url('/assets/fondo.png')] p-6">
       <div className="max-w-4xl mx-auto bg-white rounded-lg shadow-md overflow-hidden">
         {/* Encabezado del perfil */}
         <div className="bg-[#e0ecfc] p-6 text-gray-800 flex items-center"> 
