@@ -45,23 +45,31 @@ const MapaMascota = () => {
   const [puntosActivos, setPuntosActivos] = useState([]);
   const [vistaActiva, setVistaActiva] = useState(null);
   const [cargando, setCargando] = useState(false);
+  const [ultimaUbicacionGlobal, setUltimaUbicacionGlobal] = useState(null);
 
   // Modificamos la función de selección para manejar múltiples mascotas
-  const handleSeleccionarMascota = (idMascota) => {
-    setSelectedMascotas(prev => {
-      if (prev.includes(idMascota)) {
-        // Si ya está seleccionada, la removemos
-        return prev.filter(id => id !== idMascota);
-      } else {
-        // Si no está seleccionada, la agregamos
-        return [...prev, idMascota];
-      }
-    });
-    
-    // Limpiamos los puntos al cambiar selección
+  const handleSeleccionarMascota = async (idMascota) => {
+    setSelectedMascotas(prev => prev.includes(idMascota)
+      ? prev.filter(id => id !== idMascota)
+      : [...prev, idMascota]
+    );
     setPuntosActivos([]);
     setVistaActiva(null);
+
   };
+
+  useEffect(() => {
+    const actualizarUbicaciones = async () => {
+      if (!selectedMascotas.length) return;
+
+      const ubicaciones = await obtenerUltimasUbicaciones(selectedMascotas);
+      ubicaciones.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
+      setUltimaUbicacionGlobal(ubicaciones[ubicaciones.length - 1]);
+      setPuntosActivos(ubicaciones);
+    };
+
+    actualizarUbicaciones();
+  }, [selectedMascotas]);
 
   // Función para obtener la ÚLTIMA ubicación de mascotas específicas
   const obtenerUltimasUbicaciones = async (mascotasIds) => {
@@ -88,6 +96,12 @@ const MapaMascota = () => {
           if (ubicacionTransformada) {
             todasUbicaciones.push(ubicacionTransformada);
           }
+        }
+        
+        // Guardamos la última ubicación global con la mas reciente de todasUbicaciones
+        if (todasUbicaciones.length > 0) {
+          todasUbicaciones.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
+          setUltimaUbicacionGlobal(todasUbicaciones[todasUbicaciones.length - 1]);
         }
       }
 
@@ -246,6 +260,7 @@ const MapaMascota = () => {
                       mascotas={mascotasData}
                       puntos={puntosActivos}
                       key={selectedMascotas.join(',')}
+                      ultimaUbicacionGlobal = {ultimaUbicacionGlobal}
                     />
                   </div>
 

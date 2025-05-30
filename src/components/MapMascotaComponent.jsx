@@ -2,7 +2,7 @@ import React, { useEffect, useRef } from 'react';
 import maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 
-const MapMascotaComponent = ({ mascotas , puntos }) => {
+const MapMascotaComponent = ({ mascotas , puntos, ultimaUbicacionGlobal }) => {
   const mapContainer = useRef(null);
   const map = useRef(null);
   
@@ -12,15 +12,23 @@ const MapMascotaComponent = ({ mascotas , puntos }) => {
   useEffect(() => {
     if (mapContainer.current && !map.current) {
       console.log("Inicializando mapa...");
-      
+
       try {
         // Especificar la URL del estilo correctamente
         const styleUrl = `https://api.maptiler.com/maps/streets/style.json?key=${apiKey}`;
         
+        console.log("ultimaUbicacionGlobal", ultimaUbicacionGlobal);
+        const ubicacionCentro = ultimaUbicacionGlobal || {
+          latitud: -35.41963979516562,
+          longitud: -71.6741795041245,
+        };
+
+        
+
         map.current = new maplibregl.Map({
           container: mapContainer.current,
           style: styleUrl, // URL completa al archivo style.json con la API key
-          center: [-71.23025198746762, -35.00155919995224], 
+          center: [ubicacionCentro.longitud, ubicacionCentro.latitud], 
           zoom: 9
         });
         
@@ -43,8 +51,9 @@ const MapMascotaComponent = ({ mascotas , puntos }) => {
         
             // 2. Crear marcador (imagen)
             const marcador = document.createElement('div');
+            const urlFoto = mascotas[punto.mascotaId]?.urlFoto || '/assets/mascotaPorDefecto.png';
             marcador.className = 'w-10 h-10 bg-no-repeat bg-contain cursor-pointer rounded-full border-4 border-red-500';
-            marcador.style.backgroundImage = `url(${mascotas[punto.mascotaId].urlFoto})`; // Cambia la URL de la imagen según tu lógica
+            marcador.style.backgroundImage = `url(${urlFoto})`;
             marcador.style.backgroundSize = 'cover';
             marcador.style.backgroundPosition = 'center';
         

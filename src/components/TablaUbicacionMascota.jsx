@@ -51,7 +51,7 @@ const TablaUbicacionMascota = ({ datos, mascotas }) => {
         </table>
 
         {/* Cuerpo scrollable */}
-        <div className="max-h-20 overflow-y-auto">
+        <div className="max-h-80 overflow-y-auto">
           <table className="min-w-full divide-y divide-gray-200">
             <tbody>
               {pageData.map((item, index) => (
