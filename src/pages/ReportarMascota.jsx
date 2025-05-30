@@ -1,6 +1,7 @@
 import React, { useState,useEffect } from 'react';
 import { obtenerMascotaQR,reportarMascota } from '../services/mascota.service.js';
 import { useParams } from 'react-router-dom';
+import ModalReporte from '../components/ModalReporte.jsx';
 
 const ReportarMascota = () => {
 
@@ -21,6 +22,7 @@ const ReportarMascota = () => {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [submitError, setSubmitError] = useState('');
     const [submitSuccess, setSubmitSuccess] = useState('');
+    const [showModal, setShowModal] = useState(false);
 
     const fetchMascota = async () => {
         try {
@@ -46,17 +48,28 @@ const ReportarMascota = () => {
         }
     };
 
-    const handleSubmit = async (e) => {
+    const handleOpenModal = (e) => {
         e.preventDefault();
+        setSubmitError('');
+        setSubmitSuccess('');
+        setShowModal(true);
+    };
+
+    const handleConfirmReport = async (reporterName, reportComment) => {
         setSubmitError('');
         setSubmitSuccess('');
 
         try {
             setIsSubmitting(true);
-            // Aquí iría el request
-           // console.log(formData, idMascota)
-            await reportarMascota(idMascota,Number(formData.latitud),Number(formData.longitud));
-            setSubmitSuccess('Ubicación registrada exitosamente');
+            await reportarMascota(
+                idMascota,
+                Number(formData.latitud),
+                Number(formData.longitud),
+                reporterName,    
+                reportComment    
+            );
+            setSubmitSuccess('Ubicación y detalles registrados exitosamente');
+            setShowModal(false);
         } catch (error) {
             console.error('Error al reportar:', error);
             setSubmitError('Error al reportar ubicación de mascota. Intente nuevamente.');
@@ -65,11 +78,29 @@ const ReportarMascota = () => {
         }
     };
 
+
+    /*const handleSubmit = async (e) => {
+        e.preventDefault();
+        setSubmitError('');
+        setSubmitSuccess('');
+
+        try {
+            setIsSubmitting(true);
+            await reportarMascota(idMascota,Number(formData.latitud),Number(formData.longitud));
+            setSubmitSuccess('Ubicación registrada exitosamente');
+        } catch (error) {
+            console.error('Error al reportar:', error);
+            setSubmitError('Error al reportar ubicación de mascota. Intente nuevamente.');
+        } finally {
+            setIsSubmitting(false);
+        }
+    };*/
+
     useEffect(() => {
         const pedirUbicacionYFetchMascota = async () => {
             if (!navigator.geolocation) {
                 console.error('Geolocalización no soportada');
-                fetchMascota(); // igual cargamos la mascota
+                fetchMascota(); 
                 return;
             }
     
@@ -84,11 +115,11 @@ const ReportarMascota = () => {
                         longitud: longitude.toString(),
                     }));
     
-                    fetchMascota(); // Después de setear ubicación, cargamos mascota
+                    fetchMascota();
                 },
                 (error) => {
                     console.error('Error de ubicación:', error);
-                    fetchMascota(); // Aunque falle la ubicación, cargamos mascota
+                    fetchMascota(); 
                 },
                 {
                     enableHighAccuracy: true,
@@ -133,7 +164,7 @@ const ReportarMascota = () => {
                     )}
                 </div>
 
-                <form className="space-y-4" onSubmit={handleSubmit}>
+                <form className="space-y-4" onSubmit={handleOpenModal}>
                     <div className="text-center text-gray-600 font-semibold">
                         Información de ubicación
                     </div>
@@ -191,28 +222,6 @@ const ReportarMascota = () => {
                         />
                     </div>
                     
-
-                    <div className="pt-4">
-                        <button
-                            type="submit"
-                            disabled={isSubmitting}
-                            className={`w-full ${isSubmitting ? 'bg-gray-400' : 'bg-green-200 hover:bg-green-300'} text-black py-2 rounded-lg font-semibold transition duration-200`}
-                        >
-                            {isSubmitting ? 'Reportando...' : 'Reportar Ubicación'}
-                        </button>
-                    </div>
-                    <div className='h-[5vh]'>
-                    {submitSuccess && (
-                        <div className="mt-4 p-3 bg-green-100 text-green-700 rounded-lg text-center">
-                            {submitSuccess}
-                        </div>
-                    )}
-                    {submitError && (
-                        <div className="mt-4 p-3 bg-red-100 text-red-700 rounded-lg text-center">
-                            {submitError}
-                        </div>
-                    )}
-                    </div>
                     <div className="text-center text-gray-600 font-semibold pt-4">
                         Información del Dueño
                     </div>
@@ -236,7 +245,35 @@ const ReportarMascota = () => {
                             className="w-full p-2 border rounded-lg bg-gray-100 text-gray-500"
                         />
                     </div>
+                    <div className="pt-4">
+                        <button
+                            type="submit" // Mantener como submit para que `onSubmit` del form se active
+                            disabled={isSubmitting}
+                            className={`w-full ${isSubmitting ? 'bg-gray-400' : 'bg-green-200 hover:bg-green-300'} text-black py-2 rounded-lg font-semibold transition duration-200`}
+                        >
+                            {isSubmitting ? 'Cargando...' : 'Reportar Ubicación'}
+                        </button>
+                    </div>
+                    <div className='h-[5vh]'>
+                    {submitSuccess && (
+                        <div className="mt-4 p-3 bg-green-100 text-green-700 rounded-lg text-center">
+                            {submitSuccess}
+                        </div>
+                    )}
+                    {submitError && (
+                        <div className="mt-4 p-3 bg-red-100 text-red-700 rounded-lg text-center">
+                            {submitError}
+                        </div>
+                    )}
+                    </div>
                 </form>
+                <ModalReporte
+                    isOpen={showModal}
+                    onClose={() => setShowModal(false)}
+                    onConfirm={handleConfirmReport}
+                    initialData={formData} // Pasa formData al modal si necesitas mostrar algo de la mascota allí
+                    isSubmitting={isSubmitting}
+                />
             </div>
         </div>
     );
