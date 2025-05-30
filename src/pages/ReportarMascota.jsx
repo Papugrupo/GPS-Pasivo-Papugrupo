@@ -55,7 +55,7 @@ const ReportarMascota = () => {
         setShowModal(true);
     };
 
-    const handleConfirmReport = async (reporterName, reportComment) => {
+    const handleConfirmReport = async (nombreReportante, comentario) => {
         setSubmitError('');
         setSubmitSuccess('');
 
@@ -65,8 +65,8 @@ const ReportarMascota = () => {
                 idMascota,
                 Number(formData.latitud),
                 Number(formData.longitud),
-                reporterName,    
-                reportComment    
+                nombreReportante || '',
+                comentario || '' 
             );
             setSubmitSuccess('Ubicación y detalles registrados exitosamente');
             setShowModal(false);
