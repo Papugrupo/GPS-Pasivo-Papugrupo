@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import MapMascotaComponent from '../components/MapMascotaComponent.jsx';
-import { obtenerMascota, obtenerListadoMascotas, obtenerUbicacionesMascota } from '../services/mascota.service.js';
+import {obtenerListadoMascotas, obtenerUbicacionesMascota } from '../services/mascota.service.js';
 import TablaUbicacionMascota from '../components/TablaUbicacionMascota.jsx';
 import ModalMascota from '../components/ModalMascota.jsx';
 import TarjetaMascota from '../components/TarjetaMascota.jsx';
@@ -46,6 +46,7 @@ const MapaMascota = () => {
   const [vistaActiva, setVistaActiva] = useState(null);
   const [cargando, setCargando] = useState(false);
   const [ultimaUbicacionGlobal, setUltimaUbicacionGlobal] = useState(null);
+  const [botonUltimaUbicacion, setbotonUltimaUbicacion] = useState(false);
 
   // Modificamos la función de selección para manejar múltiples mascotas
   const handleSeleccionarMascota = async (idMascota) => {
@@ -66,6 +67,7 @@ const MapaMascota = () => {
       ubicaciones.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
       setUltimaUbicacionGlobal(ubicaciones[ubicaciones.length - 1]);
       setPuntosActivos(ubicaciones);
+      setbotonUltimaUbicacion(false);
     };
 
     actualizarUbicaciones();
@@ -163,6 +165,7 @@ const MapaMascota = () => {
     setVistaActiva('ultima');
 
     const ubicaciones = await obtenerUltimasUbicaciones(selectedMascotas);
+    setbotonUltimaUbicacion(true);
     setPuntosActivos(ubicaciones);
     setCargando(false);
   };
@@ -194,6 +197,7 @@ const MapaMascota = () => {
       }
 
       setPuntosActivos(todasUbicaciones);
+      setbotonUltimaUbicacion(false);
     } catch (error) {
       console.error("Error al obtener todas las ubicaciones:", error);
       setPuntosActivos([]);
@@ -261,6 +265,7 @@ const MapaMascota = () => {
                       puntos={puntosActivos}
                       key={selectedMascotas.join(',')}
                       ultimaUbicacionGlobal = {ultimaUbicacionGlobal}
+                      botonUltimaUbicacion = {botonUltimaUbicacion}
                     />
                   </div>
 

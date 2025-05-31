@@ -2,7 +2,7 @@ import React, { useEffect, useRef } from 'react';
 import maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
 
-const MapMascotaComponent = ({ mascotas , puntos, ultimaUbicacionGlobal }) => {
+const MapMascotaComponent = ({ mascotas , puntos, ultimaUbicacionGlobal, botonUltimaUbicacion }) => {
   const mapContainer = useRef(null);
   const map = useRef(null);
   
@@ -23,13 +23,17 @@ const MapMascotaComponent = ({ mascotas , puntos, ultimaUbicacionGlobal }) => {
           longitud: -71.6741795041245,
         };
 
+        let zoom = 9;
+        if(botonUltimaUbicacion){
+          zoom = 15;
+        }
         
 
         map.current = new maplibregl.Map({
           container: mapContainer.current,
           style: styleUrl, // URL completa al archivo style.json con la API key
           center: [ubicacionCentro.longitud, ubicacionCentro.latitud], 
-          zoom: 9
+          zoom: zoom
         });
         
         console.log("Mapa inicializado");
