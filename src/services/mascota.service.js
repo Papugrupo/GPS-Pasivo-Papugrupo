@@ -44,14 +44,16 @@ export const obtenerListadoMascotas = async () => {
     }
 }
 
-export const reportarMascota = async (idMascota, latitud, longitud) => {
+export const reportarMascota = async (idMascota, latitud, longitud, nombreReportante, comentario) => {
     try {
         const response = await axiosAuth.post(
             `/api/qr/registrar-ubicacion`,
             {
                 idMascota,
                 latitud,
-                longitud
+                longitud,
+                nombreReportante: nombreReportante || "",
+                comentario: comentario || ""
             }
         );
         return response.data;
