@@ -1,10 +1,14 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
+import Spinner from '../components/Spinner.jsx';
+
 
 const MapMascotaComponent = ({ mascotas , puntos, ultimaUbicacionGlobal, botonUltimaUbicacion }) => {
   const mapContainer = useRef(null);
   const map = useRef(null);
+  const [cargando, setCargando] = useState(true);
+  
   
   // Tu API key de MapTiler
   const apiKey = import.meta.env.VITE_MAPTILER_KEY; 
@@ -12,6 +16,7 @@ const MapMascotaComponent = ({ mascotas , puntos, ultimaUbicacionGlobal, botonUl
   useEffect(() => {
     if (mapContainer.current && !map.current) {
       console.log("Inicializando mapa...");
+      setCargando(true);
 
       try {
         // Especificar la URL del estilo correctamente
@@ -74,7 +79,8 @@ const MapMascotaComponent = ({ mascotas , puntos, ultimaUbicacionGlobal, botonUl
             new maplibregl.Marker({ element: contenedor })
               .setLngLat([punto.longitud, punto.latitud])
               .addTo(map.current);
-          });
+            });
+            setCargando(false);
         });
         
         map.current.on('error', (e) => {
@@ -96,6 +102,9 @@ const MapMascotaComponent = ({ mascotas , puntos, ultimaUbicacionGlobal, botonUl
 
   return (
     <div style={{width: '100%', height: '100%', position: 'relative'}}>
+      {cargando && (  
+        <Spinner mensaje="Cargando ubicaciones..." />
+      )}
       <div 
         ref={mapContainer} 
         style={{

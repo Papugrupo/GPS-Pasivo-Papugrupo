@@ -7,6 +7,7 @@ import TarjetaMascota from '../components/TarjetaMascota.jsx';
 import { MdPets } from "react-icons/md";
 import { MdMap } from "react-icons/md";
 import { MdLocationPin } from "react-icons/md";
+import Spinner from '../components/Spinner.jsx';
 
 // Helper function to transform location data
 const transformarUbicacion = (ubicacion, mascotaId) => {
@@ -44,7 +45,7 @@ const MapaMascota = () => {
   const [listaMascotas, setListaMascotas] = useState([]);
   const [puntosActivos, setPuntosActivos] = useState([]);
   const [vistaActiva, setVistaActiva] = useState(null);
-  const [cargando, setCargando] = useState(false);
+  const [cargando, setCargando] = useState(true);
   const [ultimaUbicacionGlobal, setUltimaUbicacionGlobal] = useState(null);
   const [botonUltimaUbicacion, setbotonUltimaUbicacion] = useState(false);
 
@@ -218,6 +219,10 @@ const MapaMascota = () => {
         backgroundImage: `linear-gradient(rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.3)), url('/assets/gps_background.png')`,
       }}
     >
+      {cargando && (  
+        <Spinner mensaje="Cargando mascotas..." />
+      )}
+
       <div className="container mx-auto max-w-full">
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
           {/* Sección izquierda - Listado de mascotas */}

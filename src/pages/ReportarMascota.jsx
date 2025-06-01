@@ -2,6 +2,7 @@ import React, { useState,useEffect } from 'react';
 import { obtenerMascotaQR,reportarMascota } from '../services/mascota.service.js';
 import { useParams } from 'react-router-dom';
 import ModalReporte from '../components/ModalReporte.jsx';
+import Spinner from '../components/Spinner.jsx';
 
 const ReportarMascota = () => {
 
@@ -23,6 +24,7 @@ const ReportarMascota = () => {
     const [submitError, setSubmitError] = useState('');
     const [submitSuccess, setSubmitSuccess] = useState('');
     const [showModal, setShowModal] = useState(false);
+    const [cargando, setCargando] = useState(true);
 
     const fetchMascota = async () => {
         try {
@@ -114,8 +116,9 @@ const ReportarMascota = () => {
                         latitud: latitude.toString(),
                         longitud: longitude.toString(),
                     }));
-    
+                    
                     fetchMascota();
+                    setCargando(false);
                 },
                 (error) => {
                     console.error('Error de ubicación:', error);
@@ -152,7 +155,11 @@ const ReportarMascota = () => {
 
     return (
         <div className="min-h-screen w-full bg-[url('/assets/fondo.png')] flex items-center justify-center p-4 md:p-8">
+            {cargando && (  
+                <Spinner mensaje="Cargando ubicacion..." />
+            )}
             <div className="bg-white bg-opacity-95 p-5 sm:p-6 md:p-8 rounded-lg shadow-lg w-full max-w-md">
+
                 
                 <div className="flex justify-center mb-4">
                     {formData.imagenBase64 !== '' && (
