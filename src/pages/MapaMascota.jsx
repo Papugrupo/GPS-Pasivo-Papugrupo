@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import MapMascotaComponent from '../components/MapMascotaComponent.jsx';
 import {obtenerListadoMascotas, obtenerUbicacionesMascota } from '../services/mascota.service.js';
 import TablaUbicacionMascota from '../components/TablaUbicacionMascota.jsx';
-import ModalMascota from '../components/ModalMascota.jsx';
 import TarjetaMascota from '../components/TarjetaMascota.jsx';
 import { MdPets } from "react-icons/md";
 import { MdMap } from "react-icons/md";
@@ -32,6 +31,8 @@ const transformarUbicacion = (ubicacion, mascotaId) => {
       hora: fechaObj.getHours(),
       minuto: fechaObj.getMinutes(),
       segundo: fechaObj.getSeconds(),
+      nombreReportante: ubicacion.nombreReportante || 'Desconocido',
+      comentario: ubicacion.comentario || 'Sin comentario',
     };
   } catch (error) {
     console.error("Error transformando ubicación:", error, ubicacion);

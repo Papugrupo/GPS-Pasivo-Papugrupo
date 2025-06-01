@@ -1,9 +1,13 @@
 import React, { useState, useMemo } from 'react';
+import ModalVerReporte from './ModalVerReporte.jsx';
 
 const TablaUbicacionMascota = ({ datos, mascotas }) => {
   const [currentPage, setCurrentPage] = useState(0);
   const [sortAsc, setSortAsc] = useState(true);
   const itemsPerPage = 10;
+  const [reporteParaModalReporte, setReporteParaModalReporte] = useState('');
+  const [nombreParaModalReporte, setNombreParaModalReporte] = useState('');
+
 
   const sortedDatos = useMemo(() => {
     return [...datos].sort((a, b) => {
@@ -31,6 +35,16 @@ const TablaUbicacionMascota = ({ datos, mascotas }) => {
     setSortAsc(!sortAsc);
   };
 
+    const abrirModalReporte = (reporte, nombreMascota) => {
+    setReporteParaModalReporte(reporte); 
+    console.log('Abriendo modal con reporte:', reporte);
+    setNombreParaModalReporte(nombreMascota || ''); // Asegurarse de que el nombre esté definido
+  }
+
+  const cerrarModalReporte = () => {
+    setReporteParaModalReporte(''); 
+  }
+
   return (
     <div className="overflow-x-auto">
       <div className=" border border-gray-200 rounded-md bg-white">
@@ -46,6 +60,7 @@ const TablaUbicacionMascota = ({ datos, mascotas }) => {
               </th>
               <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Coordenadas</th>
               <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Mascota</th>
+              <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Acciones</th>
             </tr>
           </thead>
         </table>
@@ -61,6 +76,11 @@ const TablaUbicacionMascota = ({ datos, mascotas }) => {
                   </td>
                   <td className="px-4 py-3 text-sm text-gray-700 w-1/2">{item.latitud},{item.longitud}</td>
                   <td className="px-4 py-3 text-sm text-gray-700 w-1/2">{mascotas[item.mascotaId]?.nombre || 'Desconocida'}</td>
+                  <td className="px-4 py-3 text-sm text-gray-700 w-1/2">
+                    <button onClick={() => abrirModalReporte(item, mascotas[item.mascotaId]?.nombre)} className="text-blue-600 hover:underline">
+                      Ver detalles
+                    </button>
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -90,6 +110,7 @@ const TablaUbicacionMascota = ({ datos, mascotas }) => {
           </button>
         </div>
       </div>
+      {reporteParaModalReporte && <ModalVerReporte reporte={reporteParaModalReporte} closeModal={cerrarModalReporte} nombreMascota={nombreParaModalReporte} />}
     </div>
   );
 };

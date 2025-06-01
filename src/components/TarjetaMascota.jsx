@@ -10,7 +10,7 @@ const TarjetaMascota = ({ idMascota, onSeleccionar, seleccionada }) => {
   const [mascota, setMascota] = useState('');
   const imagenMascota = mascota.urlFoto || '/assets/mascotaPorDefecto.png';
   const [mostrarModalQR, setMostrarModalQR] = useState(false);
-  const [mascotaParaModalDetalles, setMascotaParaModalDetalles] = useState(''); // Renombrado para claridad
+  const [mascotaParaModalDetalles, setMascotaParaModalDetalles] = useState('');
 
   const toggleDesplegado = () => {
     setDesplegado(!desplegado);
@@ -41,7 +41,6 @@ const TarjetaMascota = ({ idMascota, onSeleccionar, seleccionada }) => {
   };
 
   const abrirModalDetalles = () => {
-    console.log('Abrir modal detalles para:', idMascota);
     setMascotaParaModalDetalles(idMascota); 
   }
 
