@@ -145,8 +145,9 @@ const MapaMascota = () => {
           
           const ubicaciones = await obtenerUltimasUbicaciones(ids);
           setPuntosActivos(ubicaciones);
-          setCargando(false);
+          
         }
+        setCargando(false);
       } catch (err) {
         console.error('Error al obtener el listado de mascotas', err);
         setCargando(false);
