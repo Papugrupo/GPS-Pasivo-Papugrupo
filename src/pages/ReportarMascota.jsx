@@ -1,6 +1,8 @@
 import React, { useState,useEffect } from 'react';
 import { obtenerMascotaQR,reportarMascota } from '../services/mascota.service.js';
 import { useParams } from 'react-router-dom';
+import ModalReporte from '../components/ModalReporte.jsx';
+import Spinner from '../components/Spinner.jsx';
 
 const ReportarMascota = () => {
 
@@ -21,6 +23,8 @@ const ReportarMascota = () => {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [submitError, setSubmitError] = useState('');
     const [submitSuccess, setSubmitSuccess] = useState('');
+    const [showModal, setShowModal] = useState(false);
+    const [cargando, setCargando] = useState(true);
 
     const fetchMascota = async () => {
         try {
@@ -46,17 +50,28 @@ const ReportarMascota = () => {
         }
     };
 
-    const handleSubmit = async (e) => {
+    const handleOpenModal = (e) => {
         e.preventDefault();
+        setSubmitError('');
+        setSubmitSuccess('');
+        setShowModal(true);
+    };
+
+    const handleConfirmReport = async (nombreReportante, comentario) => {
         setSubmitError('');
         setSubmitSuccess('');
 
         try {
             setIsSubmitting(true);
-            // Aquí iría el request
-           // console.log(formData, idMascota)
-            await reportarMascota(idMascota,Number(formData.latitud),Number(formData.longitud));
-            setSubmitSuccess('Ubicación registrada exitosamente');
+            await reportarMascota(
+                idMascota,
+                Number(formData.latitud),
+                Number(formData.longitud),
+                nombreReportante || '',
+                comentario || '' 
+            );
+            setSubmitSuccess('Ubicación y detalles registrados exitosamente');
+            setShowModal(false);
         } catch (error) {
             console.error('Error al reportar:', error);
             setSubmitError('Error al reportar ubicación de mascota. Intente nuevamente.');
@@ -65,11 +80,29 @@ const ReportarMascota = () => {
         }
     };
 
+
+    /*const handleSubmit = async (e) => {
+        e.preventDefault();
+        setSubmitError('');
+        setSubmitSuccess('');
+
+        try {
+            setIsSubmitting(true);
+            await reportarMascota(idMascota,Number(formData.latitud),Number(formData.longitud));
+            setSubmitSuccess('Ubicación registrada exitosamente');
+        } catch (error) {
+            console.error('Error al reportar:', error);
+            setSubmitError('Error al reportar ubicación de mascota. Intente nuevamente.');
+        } finally {
+            setIsSubmitting(false);
+        }
+    };*/
+
     useEffect(() => {
         const pedirUbicacionYFetchMascota = async () => {
             if (!navigator.geolocation) {
                 console.error('Geolocalización no soportada');
-                fetchMascota(); // igual cargamos la mascota
+                fetchMascota(); 
                 return;
             }
     
@@ -83,12 +116,13 @@ const ReportarMascota = () => {
                         latitud: latitude.toString(),
                         longitud: longitude.toString(),
                     }));
-    
-                    fetchMascota(); // Después de setear ubicación, cargamos mascota
+                    
+                    fetchMascota();
+                    setCargando(false);
                 },
                 (error) => {
                     console.error('Error de ubicación:', error);
-                    fetchMascota(); // Aunque falle la ubicación, cargamos mascota
+                    fetchMascota(); 
                 },
                 {
                     enableHighAccuracy: true,
@@ -121,7 +155,11 @@ const ReportarMascota = () => {
 
     return (
         <div className="min-h-screen w-full bg-[url('/assets/fondo.png')] flex items-center justify-center p-4 md:p-8">
+            {cargando && (  
+                <Spinner mensaje="Cargando ubicacion..." />
+            )}
             <div className="bg-white bg-opacity-95 p-5 sm:p-6 md:p-8 rounded-lg shadow-lg w-full max-w-md">
+
                 
                 <div className="flex justify-center mb-4">
                     {formData.imagenBase64 !== '' && (
@@ -133,7 +171,7 @@ const ReportarMascota = () => {
                     )}
                 </div>
 
-                <form className="space-y-4" onSubmit={handleSubmit}>
+                <form className="space-y-4" onSubmit={handleOpenModal}>
                     <div className="text-center text-gray-600 font-semibold">
                         Información de ubicación
                     </div>
@@ -191,28 +229,6 @@ const ReportarMascota = () => {
                         />
                     </div>
                     
-
-                    <div className="pt-4">
-                        <button
-                            type="submit"
-                            disabled={isSubmitting}
-                            className={`w-full ${isSubmitting ? 'bg-gray-400' : 'bg-green-200 hover:bg-green-300'} text-black py-2 rounded-lg font-semibold transition duration-200`}
-                        >
-                            {isSubmitting ? 'Reportando...' : 'Reportar Ubicación'}
-                        </button>
-                    </div>
-                    <div className='h-[5vh]'>
-                    {submitSuccess && (
-                        <div className="mt-4 p-3 bg-green-100 text-green-700 rounded-lg text-center">
-                            {submitSuccess}
-                        </div>
-                    )}
-                    {submitError && (
-                        <div className="mt-4 p-3 bg-red-100 text-red-700 rounded-lg text-center">
-                            {submitError}
-                        </div>
-                    )}
-                    </div>
                     <div className="text-center text-gray-600 font-semibold pt-4">
                         Información del Dueño
                     </div>
@@ -236,7 +252,35 @@ const ReportarMascota = () => {
                             className="w-full p-2 border rounded-lg bg-gray-100 text-gray-500"
                         />
                     </div>
+                    <div className="pt-4">
+                        <button
+                            type="submit" // Mantener como submit para que `onSubmit` del form se active
+                            disabled={isSubmitting}
+                            className={`w-full ${isSubmitting ? 'bg-gray-400' : 'bg-green-200 hover:bg-green-300'} text-black py-2 rounded-lg font-semibold transition duration-200`}
+                        >
+                            {isSubmitting ? 'Cargando...' : 'Reportar Ubicación'}
+                        </button>
+                    </div>
+                    <div className='h-[5vh]'>
+                    {submitSuccess && (
+                        <div className="mt-4 p-3 bg-green-100 text-green-700 rounded-lg text-center">
+                            {submitSuccess}
+                        </div>
+                    )}
+                    {submitError && (
+                        <div className="mt-4 p-3 bg-red-100 text-red-700 rounded-lg text-center">
+                            {submitError}
+                        </div>
+                    )}
+                    </div>
                 </form>
+                <ModalReporte
+                    isOpen={showModal}
+                    onClose={() => setShowModal(false)}
+                    onConfirm={handleConfirmReport}
+                    initialData={formData} // Pasa formData al modal si necesitas mostrar algo de la mascota allí
+                    isSubmitting={isSubmitting}
+                />
             </div>
         </div>
     );

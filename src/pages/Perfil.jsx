@@ -3,6 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import { actualizarUsuario, obtenerUsuario } from '../services/usuario.service';
 import { obtenerListadoMascotas } from '../services/mascota.service';
 import ModalMascota from '../components/ModalMascota.jsx';
+import Spinner from '../components/Spinner.jsx';
 
 const Perfil = () => {
   const { user } = useAuth();
@@ -22,6 +23,8 @@ const Perfil = () => {
   // Estado para controlar el modal de mascotas
   const [modalMascotaVisible, setModalMascotaVisible] = useState(false);
   const [mascotaSeleccionada, setMascotaSeleccionada] = useState(null);
+  const [cargando, setCargando] = useState(true);
+  
 
   useEffect(() => {
     const cargarDatosUsuario = async () => {
@@ -36,6 +39,7 @@ const Perfil = () => {
           const response = await obtenerListadoMascotas();
           setMascotas(response);
           setLoadingMascotas(false);
+          setCargando(false);
         }
       } catch (error) {
         console.error('Error al cargar datos del usuario:', error);
@@ -79,6 +83,9 @@ const Perfil = () => {
 
   return (
     <div className="min-h-screen bg-[url('/assets/fondo.png')] p-6">
+      {cargando && (  
+        <Spinner mensaje="Cargando datos..." />
+      )}
       <div className="max-w-4xl mx-auto bg-white rounded-lg shadow-md overflow-hidden">
         {/* Encabezado del perfil */}
         <div className="bg-[#e0ecfc] p-6 text-gray-800 flex items-center"> 

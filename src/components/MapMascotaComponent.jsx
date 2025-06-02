@@ -1,10 +1,14 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import maplibregl from 'maplibre-gl';
 import 'maplibre-gl/dist/maplibre-gl.css';
+import Spinner from '../components/Spinner.jsx';
 
-const MapMascotaComponent = ({ mascotas , puntos, ultimaUbicacionGlobal }) => {
+
+const MapMascotaComponent = ({ mascotas , puntos, ultimaUbicacionGlobal, botonUltimaUbicacion }) => {
   const mapContainer = useRef(null);
   const map = useRef(null);
+  const [cargando, setCargando] = useState(true);
+  
   
   // Tu API key de MapTiler
   const apiKey = import.meta.env.VITE_MAPTILER_KEY; 
@@ -12,6 +16,7 @@ const MapMascotaComponent = ({ mascotas , puntos, ultimaUbicacionGlobal }) => {
   useEffect(() => {
     if (mapContainer.current && !map.current) {
       console.log("Inicializando mapa...");
+      setCargando(true);
 
       try {
         // Especificar la URL del estilo correctamente
@@ -23,13 +28,17 @@ const MapMascotaComponent = ({ mascotas , puntos, ultimaUbicacionGlobal }) => {
           longitud: -71.6741795041245,
         };
 
+        let zoom = 9;
+        if(botonUltimaUbicacion){
+          zoom = 15;
+        }
         
 
         map.current = new maplibregl.Map({
           container: mapContainer.current,
           style: styleUrl, // URL completa al archivo style.json con la API key
           center: [ubicacionCentro.longitud, ubicacionCentro.latitud], 
-          zoom: 9
+          zoom: zoom
         });
         
         console.log("Mapa inicializado");
@@ -70,7 +79,8 @@ const MapMascotaComponent = ({ mascotas , puntos, ultimaUbicacionGlobal }) => {
             new maplibregl.Marker({ element: contenedor })
               .setLngLat([punto.longitud, punto.latitud])
               .addTo(map.current);
-          });
+            });
+            setCargando(false);
         });
         
         map.current.on('error', (e) => {
@@ -92,6 +102,9 @@ const MapMascotaComponent = ({ mascotas , puntos, ultimaUbicacionGlobal }) => {
 
   return (
     <div style={{width: '100%', height: '100%', position: 'relative'}}>
+      {cargando && (  
+        <Spinner mensaje="Cargando ubicaciones..." />
+      )}
       <div 
         ref={mapContainer} 
         style={{

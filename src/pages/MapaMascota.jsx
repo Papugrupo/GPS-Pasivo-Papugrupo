@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import MapMascotaComponent from '../components/MapMascotaComponent.jsx';
-import { obtenerMascota, obtenerListadoMascotas, obtenerUbicacionesMascota } from '../services/mascota.service.js';
+import {obtenerListadoMascotas, obtenerUbicacionesMascota } from '../services/mascota.service.js';
 import TablaUbicacionMascota from '../components/TablaUbicacionMascota.jsx';
-import ModalMascota from '../components/ModalMascota.jsx';
 import TarjetaMascota from '../components/TarjetaMascota.jsx';
 import { MdPets } from "react-icons/md";
 import { MdMap } from "react-icons/md";
 import { MdLocationPin } from "react-icons/md";
+import Spinner from '../components/Spinner.jsx';
 
 // Helper function to transform location data
 const transformarUbicacion = (ubicacion, mascotaId) => {
@@ -31,6 +31,8 @@ const transformarUbicacion = (ubicacion, mascotaId) => {
       hora: fechaObj.getHours(),
       minuto: fechaObj.getMinutes(),
       segundo: fechaObj.getSeconds(),
+      nombreReportante: ubicacion.nombreReportante || 'Desconocido',
+      comentario: ubicacion.comentario || 'Sin comentario',
     };
   } catch (error) {
     console.error("Error transformando ubicación:", error, ubicacion);
@@ -44,8 +46,9 @@ const MapaMascota = () => {
   const [listaMascotas, setListaMascotas] = useState([]);
   const [puntosActivos, setPuntosActivos] = useState([]);
   const [vistaActiva, setVistaActiva] = useState(null);
-  const [cargando, setCargando] = useState(false);
+  const [cargando, setCargando] = useState(true);
   const [ultimaUbicacionGlobal, setUltimaUbicacionGlobal] = useState(null);
+  const [botonUltimaUbicacion, setbotonUltimaUbicacion] = useState(false);
 
   // Modificamos la función de selección para manejar múltiples mascotas
   const handleSeleccionarMascota = async (idMascota) => {
@@ -66,6 +69,7 @@ const MapaMascota = () => {
       ubicaciones.sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
       setUltimaUbicacionGlobal(ubicaciones[ubicaciones.length - 1]);
       setPuntosActivos(ubicaciones);
+      setbotonUltimaUbicacion(false);
     };
 
     actualizarUbicaciones();
@@ -163,6 +167,7 @@ const MapaMascota = () => {
     setVistaActiva('ultima');
 
     const ubicaciones = await obtenerUltimasUbicaciones(selectedMascotas);
+    setbotonUltimaUbicacion(true);
     setPuntosActivos(ubicaciones);
     setCargando(false);
   };
@@ -194,6 +199,7 @@ const MapaMascota = () => {
       }
 
       setPuntosActivos(todasUbicaciones);
+      setbotonUltimaUbicacion(false);
     } catch (error) {
       console.error("Error al obtener todas las ubicaciones:", error);
       setPuntosActivos([]);
@@ -214,6 +220,10 @@ const MapaMascota = () => {
         backgroundImage: `linear-gradient(rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.3)), url('/assets/gps_background.png')`,
       }}
     >
+      {cargando && (  
+        <Spinner mensaje="Cargando mascotas..." />
+      )}
+
       <div className="container mx-auto max-w-full">
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
           {/* Sección izquierda - Listado de mascotas */}
@@ -261,6 +271,7 @@ const MapaMascota = () => {
                       puntos={puntosActivos}
                       key={selectedMascotas.join(',')}
                       ultimaUbicacionGlobal = {ultimaUbicacionGlobal}
+                      botonUltimaUbicacion = {botonUltimaUbicacion}
                     />
                   </div>
 
