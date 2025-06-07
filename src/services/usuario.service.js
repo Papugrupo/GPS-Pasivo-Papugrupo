@@ -18,7 +18,7 @@ export const loginUsuario = async (usuario) => {
         const response = await axiosPublic.post(`/api/auth/login`, usuario);
         const token = response.data.token;
         console.log('token', token);
-        Cookies.set('token', token, { expires: 1 });
+        //Cookies.set('token', token, { expires: 1 });
         return response.data;
     } catch (error) {
         console.error('Error al iniciar sesión:', error);

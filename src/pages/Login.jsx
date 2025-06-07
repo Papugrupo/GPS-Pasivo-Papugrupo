@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import { loginUsuario } from '../services/usuario.service'; 
+import { loginUsuario } from '../services/usuario.service';
+//import Cookies from 'js-cookie'; 
 
 const Login = () => {
   const [formData, setFormData] = useState({
@@ -63,12 +64,12 @@ const Login = () => {
       });
       
       if (response && response.token) {
-        localStorage.setItem('token', response.token);
+        //localStorage.setItem('token', response.token);
         
         // Guardar el email también
         localStorage.setItem('userEmail', formData.correo);
         
-        login({ email: formData.correo }); // Pasar el objeto user con email
+        login({ email: formData.correo }, response.token); // Pasar el objeto user con email
         
 
         navigate('/mapa');

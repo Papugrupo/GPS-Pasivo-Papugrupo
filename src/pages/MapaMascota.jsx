@@ -229,31 +229,33 @@ const MapaMascota = () => {
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
           {/* Sección izquierda - Listado de mascotas */}
           <div className="lg:col-span-1">
-            <div className="bg-white rounded-2xl shadow-xl p-4 h-full">
+            <div className="bg-white rounded-2xl shadow-xl p-4 h-full flex flex-col">
               <div className="flex justify-center items-center gap-2 mb-4">
                 <MdPets className="text-lg text-blue-600" />
                 <h2 className="text-lg font-bold text-gray-800">Mis Mascotas</h2>
               </div>
 
-              <div className="space-y-2 max-h-[calc(100vh-350px)] overflow-y-auto pr-1">
-                {listaMascotas.length === 0 ? (
+               {listaMascotas.length === 0 ? (
+                <div className="flex-1 flex items-center justify-center"> {/* MANTÉN ESTAS CLASES */}
                   <div className="text-center py-8 text-gray-500">
                     <MdPets className="text-4xl mx-auto mb-3 text-gray-300" />
                     <p className="text-base">No tienes mascotas registradas</p>
                   </div>
-                ) : (
-                  listaMascotas.map((mascota) => (
+                </div>
+              ) : (
+              <div className="space-y-2 max-h-[calc(100vh-350px)] overflow-y-auto pr-1"> {/* ESTE DIV AHORA ESTÁ EN EL ELSE */}
+                {listaMascotas.map((mascota) => (
                     <TarjetaMascota
-                      key={mascota.idMascota}
+                      key={mascota.idMascota} 
                       idMascota={mascota.idMascota}
                       onSeleccionar={handleSeleccionarMascota}
                       seleccionada={selectedMascotas.includes(mascota.idMascota)}
                     />
-                  ))
-                )}
-              </div>
+                  ))}
+                </div> 
+              )}
             </div>
-          </div>
+           </div>
 
           {/* Sección central - Mapa */}
           <div className="lg:col-span-2">
