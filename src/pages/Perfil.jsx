@@ -82,7 +82,7 @@ const Perfil = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[url('/assets/fondo.png')] p-6">
+    <div className="min-h-screen w-full bg-[url('/assets/fondo.png')] bg-cover bg-center p-6">
       {cargando && (  
         <Spinner mensaje="Cargando datos..." />
       )}
