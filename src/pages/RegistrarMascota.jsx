@@ -3,7 +3,10 @@ import { QRCodeCanvas } from 'qrcode.react';
 import QRCode from 'qrcode';
 import JSZip from 'jszip';
 import { saveAs } from 'file-saver';
-//import { useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
+import { MdMap } from "react-icons/md";
+import { FaCheck } from "react-icons/fa";
+
 
 import { registrarMascotas } from '../services/mascota.service';
 
@@ -79,7 +82,7 @@ const RegistrarMascota = () => {
   const [mascotas, setMascotas] = useState([]);
   const [tabActiva, setTabActiva] = useState(0);
 
-  //const navigate = useNavigate();
+  const navigate = useNavigate();
 
 
   const [intentadoGuardar, setIntentadoGuardar] = useState(false);
@@ -508,26 +511,49 @@ const RegistrarMascota = () => {
         </div>
         <Modal isOpen={isModalOpen} onClose={() => closeModalHandler()}>
           
-          <h2 className="text-xl font-bold mb-4">
-            {mascotas.length > 1 ? "Registro exitoso de mascotas!" : "Registro exitoso de mascota"}
-          </h2>
-          <p> Ahora puedes descargar las imágenes QR de cada mascota o descargar un archivo
-            comprimido con todas las imágenes.
-          </p>
-          <p>No te preocupes, puedes descargar los QR en otro momento desde el listado de mascotas!</p>
-          {registroResponse.map((mascota) =>(
-            <div key={mascota.idMascota} className='py-2'>
-              <div className='flex justify-between items-center'>
-                <p className='pl-4'>{mascota.nombre}</p>
-                <button onClick={() =>descargarQR(mascota)} className="px-4 py-2 bg-blue-400 text-white rounded-lg font-semibold hover:bg-green-600" >Descargar QR</button>
-              </div>
+          <div className='mb-6'>
+            <div className='flex justify-center items-center gap-2'>
+              <FaCheck />
+              <h2 className="text-xl font-bold ">
+                {mascotas.length > 1 ? "Registro exitoso de mascotas!" : "Registro exitoso de mascota"}
+              </h2>
             </div>
-          ))}
+            <div className=' text-xs p-4'>
+              <p> Ahora puedes descargar las imágenes QR de cada mascota o descargar un archivo
+              comprimido con todas las imágenes.
+              </p>
+              <p>No te preocupes, puedes descargar los QR en otro momento desde el listado de mascotas!</p>
+            </div>
+          </div>
+          <div className='flex flex-col h-40 overflow-y-auto'>
+            {registroResponse.map((mascota) =>(
+              <div key={mascota.idMascota} className='py-2'>
+                <div className='flex justify-between items-center'>
+                  <p className='pl-4'>{mascota.nombre}</p>
+                  <button onClick={() =>descargarQR(mascota)} className="px-4 py-2 bg-blue-400 text-white rounded-lg font-semibold hover:bg-green-600" >Descargar QR</button>
+                </div>
+              </div>
+            ))}
+          </div>
           { registroResponse.length > 1 ? (
             <div className='flex justify-center pt-8'>
               <button onClick={() => generarZipConQRs()} className="px-4 py-2 bg-green-500 text-white rounded-lg font-semibold hover:bg-green-600" >Descargar QR's en ZIP</button>
             </div>
             ) : null }
+            <div className='flex mt-16 justify-center h-14 gap-2'>
+              <button className='w-50 hover:bg-blue-600 hover:text-white rounded-lg p-2   cursor-pointer' 
+                      title='Registrar Mascota'
+                      onClick={() =>setIsModalOpen(false)}>
+                        <span>Registrar mas mascotas</span>
+              </button>
+              <button className='w-50 hover:bg-blue-600 hover:text-white rounded-lg p-2 bg-blue-300 cursor-pointer' 
+                      title='Ir al menu principal'
+                      onClick={() =>navigate('/mapa')}>
+                        <div className='flex justify-center items-center'>
+                          <span>Ir al menu principal</span>
+                        </div>
+              </button>
+            </div>
         </Modal>
       </div>
     </div>
