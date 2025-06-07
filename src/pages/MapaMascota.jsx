@@ -7,6 +7,7 @@ import { MdPets } from "react-icons/md";
 import { MdMap } from "react-icons/md";
 import { MdLocationPin } from "react-icons/md";
 import Spinner from '../components/Spinner.jsx';
+import { useNavigate } from "react-router-dom";
 
 // Helper function to transform location data
 const transformarUbicacion = (ubicacion, mascotaId) => {
@@ -49,6 +50,8 @@ const MapaMascota = () => {
   const [cargando, setCargando] = useState(true);
   const [ultimaUbicacionGlobal, setUltimaUbicacionGlobal] = useState(null);
   const [botonUltimaUbicacion, setbotonUltimaUbicacion] = useState(false);
+
+  const navigate = useNavigate();
 
   // Modificamos la función de selección para manejar múltiples mascotas
   const handleSeleccionarMascota = async (idMascota) => {
@@ -229,7 +232,7 @@ const MapaMascota = () => {
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
           {/* Sección izquierda - Listado de mascotas */}
           <div className="lg:col-span-1">
-            <div className="bg-white rounded-2xl shadow-xl p-4 h-full flex flex-col">
+            <div className="bg-white rounded-2xl shadow-md p-4 h-full">
               <div className="flex justify-center items-center gap-2 mb-4">
                 <MdPets className="text-lg text-blue-600" />
                 <h2 className="text-lg font-bold text-gray-800">Mis Mascotas</h2>
@@ -254,12 +257,19 @@ const MapaMascota = () => {
                   ))}
                 </div> 
               )}
+              <div className='flex justify-end items-center px-4  h-30'>
+                <button className='w-full hover:bg-blue-600 hover:text-white rounded-lg p-2 mb-2 bg-blue-300 cursor-pointer' 
+                      title='Registrar Mascota'
+                      onClick={() =>navigate('/registro-mascota')}>
+                        {listaMascotas.length == 0 ? 'Registra tu primera mascota' : 'Registrar nueva mascota'}
+              </button>
+              </div>
             </div>
            </div>
 
           {/* Sección central - Mapa */}
-          <div className="lg:col-span-2">
-            <div className="bg-white rounded-2xl shadow-xl p-4 flex flex-col">
+          <div className="lg:col-span-3">
+            <div className="bg-white rounded-2xl shadow-md p-4 flex flex-col">
               <div className="flex items-center justify-center gap-2 mb-4">
                 <MdMap className="text-lg text-green-600" />
                 <h2 className="text-lg font-bold text-gray-800">Mapa de Ubicaciones</h2>
@@ -268,7 +278,7 @@ const MapaMascota = () => {
               {selectedMascotas.length > 0 ? (
                 <>
                   {/* Mapa con altura optimizada */}
-                  <div className="h-[280px] md:h-[320px] lg:h-[360px] w-full rounded-xl overflow-hidden shadow-md border border-gray-200">
+                  <div className="h-[280px] md:h-[320px] lg:h-[360px] w-full rounded-xl overflow-hidden border border-gray-200">
                     <MapMascotaComponent
                       mascotas={mascotasData}
                       puntos={puntosActivos}
@@ -337,38 +347,37 @@ const MapaMascota = () => {
               )}
             </div>
           </div>
-
-          {/* Sección derecha - Tabla de ubicaciones */}
-          <div className="lg:col-span-1">
-            <div className="bg-white rounded-2xl shadow-xl p-4 h-full flex flex-col">
-              <div className="flex items-center justify-center gap-2 mb-4">
-                <MdLocationPin className="text-lg text-red-600" />
-                <h2 className="text-lg font-bold text-gray-800 text-center">
-                  Ubicaciones
-                </h2>
-              </div>
-
-              {selectedMascotas.length > 0 ? (
-                <>
-                  <div className="mb-3 p-2 bg-gray-50 rounded-lg">
-                    <p className="text-xs text-gray-600 font-medium text-center">
-                      {getNombresMascotasSeleccionadas()}
-                    </p>
-                  </div>
-
-                  <div className="flex-1 overflow-y-auto max-h-[calc(100vh-350px)]">
-                    <TablaUbicacionMascota datos={puntosActivos} mascotas={mascotasData} />
-                  </div>
-                </>
-              ) : (
-                <div className="flex-1 flex items-center justify-center">
-                  <div className="text-center text-gray-500">
-                    <MdLocationPin className="text-4xl mx-auto mb-3 text-gray-300" />
-                    <p className="text-sm">Selecciona mascotas para ver sus ubicaciones</p>
-                  </div>
-                </div>
-              )}
+        </div>
+        {/* Sección derecha - Tabla de ubicaciones */}
+        <div className="lg:col-span-1 mt-4">
+          <div className="bg-white rounded-2xl shadow-xl p-4 h-full flex flex-col">
+            <div className="flex items-center justify-center gap-2 mb-4">
+              <MdLocationPin className="text-lg text-red-600" />
+              <h2 className="text-lg font-bold text-gray-800 text-center">
+                Ubicaciones
+              </h2>
             </div>
+
+            {selectedMascotas.length > 0 ? (
+              <div className='min-h-[20vh]'>
+                <div className="mb-3 p-2 bg-gray-50 rounded-lg">
+                  <p className="text-xs text-gray-600 font-medium text-center">
+                    {getNombresMascotasSeleccionadas()}
+                  </p>
+                </div>
+
+                <div className="flex-1 overflow-y-auto max-h-[calc(100vh-350px)]">
+                  <TablaUbicacionMascota datos={puntosActivos} mascotas={mascotasData} />
+                </div>
+              </div>
+            ) : (
+              <div className="flex-1 flex items-center justify-center">
+                <div className="text-center text-gray-500">
+                  <MdLocationPin className="text-4xl mx-auto mb-3 text-gray-300" />
+                  <p className="text-sm">Selecciona mascotas para ver sus ubicaciones</p>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       </div>
