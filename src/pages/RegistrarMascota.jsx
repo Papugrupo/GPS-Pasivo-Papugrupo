@@ -440,12 +440,19 @@ const RegistrarMascota = () => {
                 ['telefonoVeterinario', 'Teléfono Veterinario'],
                 ['comportamiento', 'Comportamiento'],
                 ['observaciones', 'Observaciones']
-              ].map(([name, label]) => (
-                <div key={name} className="flex flex-col sm:flex-row sm:items-center sm:space-x-4">
+              ].map(([name, label]) => {
+                const today = new Date();
+                const year = today.getFullYear();
+                const month = String(today.getMonth() + 1).padStart(2, '0');
+                const day = String(today.getDate()).padStart(2, '0');
+                const maxDate = `${year}-${month}-${day}`;
+
+                return(<div key={name} className="flex flex-col sm:flex-row sm:items-center sm:space-x-4">
                   <label htmlFor={name} className="text-gray-700 font-semibold sm:w-40">{label}{label == 'Fecha de Nacimiento' ? (<span className='text-red-500'>*</span>): null}</label>
                   <input
                     type={name.includes("fecha") ? "date" : "text"}
                     name={name}
+                    max={name.includes("fecha") ? maxDate : undefined}
                     placeholder={
                         label.includes("Color") ? "Negro,Blanco,Café,Dorado..." : 
                         label.includes("Tamaño") ? 'Pequeño,Mediano,Grande': 
@@ -461,8 +468,8 @@ const RegistrarMascota = () => {
                     className="w-full bg-gray-100 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
                   />
                   
-                </div>
-              ))}
+                </div>)
+              })}
 
               
 
