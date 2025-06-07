@@ -543,7 +543,7 @@ const RegistrarMascota = () => {
             <div className='flex mt-16 justify-center h-14 gap-2'>
               <button className='w-50 hover:bg-blue-600 hover:text-white rounded-lg p-2   cursor-pointer' 
                       title='Registrar Mascota'
-                      onClick={() =>setIsModalOpen(false)}>
+                      onClick={() =>closeModalHandler()}>
                         <span>Registrar mas mascotas</span>
               </button>
               <button className='w-50 hover:bg-blue-600 hover:text-white rounded-lg p-2 bg-blue-300 cursor-pointer' 

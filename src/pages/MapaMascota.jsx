@@ -257,11 +257,13 @@ const MapaMascota = () => {
                   ))}
                 </div> 
               )}
-              <button className='w-full hover:bg-blue-600 hover:text-white rounded-lg p-2 mb-2 bg-blue-300 cursor-pointer' 
+              <div className='flex justify-end items-center px-4  h-30'>
+                <button className='w-full hover:bg-blue-600 hover:text-white rounded-lg p-2 mb-2 bg-blue-300 cursor-pointer' 
                       title='Registrar Mascota'
                       onClick={() =>navigate('/registro-mascota')}>
                         {listaMascotas.length == 0 ? 'Registra tu primera mascota' : 'Registrar nueva mascota'}
               </button>
+              </div>
             </div>
            </div>
 
