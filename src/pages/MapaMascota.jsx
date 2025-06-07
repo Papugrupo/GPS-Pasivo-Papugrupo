@@ -7,6 +7,7 @@ import { MdPets } from "react-icons/md";
 import { MdMap } from "react-icons/md";
 import { MdLocationPin } from "react-icons/md";
 import Spinner from '../components/Spinner.jsx';
+import { useNavigate } from "react-router-dom";
 
 // Helper function to transform location data
 const transformarUbicacion = (ubicacion, mascotaId) => {
@@ -49,6 +50,8 @@ const MapaMascota = () => {
   const [cargando, setCargando] = useState(true);
   const [ultimaUbicacionGlobal, setUltimaUbicacionGlobal] = useState(null);
   const [botonUltimaUbicacion, setbotonUltimaUbicacion] = useState(false);
+
+  const navigate = useNavigate();
 
   // Modificamos la función de selección para manejar múltiples mascotas
   const handleSeleccionarMascota = async (idMascota) => {
@@ -254,6 +257,11 @@ const MapaMascota = () => {
                   ))}
                 </div> 
               )}
+              <button className='w-full hover:bg-blue-600 hover:text-white rounded-lg p-2 mb-2 bg-blue-300 cursor-pointer' 
+                      title='Registrar Mascota'
+                      onClick={() =>navigate('/registro-mascota')}>
+                        {listaMascotas.length == 0 ? 'Registra tu primera mascota' : 'Registrar nueva mascota'}
+              </button>
             </div>
            </div>
 
