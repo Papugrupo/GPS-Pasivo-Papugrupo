@@ -228,7 +228,7 @@ const MapaMascota = () => {
         <Spinner mensaje="Cargando mascotas..." />
       )}
 
-      <div className="container mx-auto max-w-full">
+      <div className="container mx-auto max-w-full mt-4">
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
           {/* Sección izquierda - Listado de mascotas */}
           <div className="lg:col-span-1">
