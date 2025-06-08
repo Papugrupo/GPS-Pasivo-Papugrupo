@@ -3,6 +3,7 @@ import { obtenerMascota } from '../services/mascota.service.js';
 import ModalQR from './ModalQR';
 import ModalMascota from './ModalMascota.jsx';
 import { IoIosArrowDropdown,IoIosArrowDropup } from "react-icons/io";
+import {calcularEdad} from '../utils/dateUtils.js';
 
 // Añadir onSeleccionar y seleccionada a las props
 const TarjetaMascota = ({ idMascota, onSeleccionar, seleccionada }) => { 
@@ -27,19 +28,7 @@ const TarjetaMascota = ({ idMascota, onSeleccionar, seleccionada }) => {
     };
     fetchMascota();
   }, [idMascota]);
-
-  const calcularEdad = (fechaNacimiento) => {
-    if (!fechaNacimiento) return 'N/A'; // Manejar caso undefined/null
-    const fechaActual = new Date();
-    const fechaNac = new Date(fechaNacimiento);
-    let edad = fechaActual.getFullYear() - fechaNac.getFullYear();
-    const mes = fechaActual.getMonth() - fechaNac.getMonth();
-    if (mes < 0 || (mes === 0 && fechaActual.getDate() < fechaNac.getDate())) {
-      edad--;
-    }
-    return edad >= 0 ? `${edad} años` : 'N/A'; // Asegurar que la edad no sea negativa
-  };
-
+  
   const abrirModalDetalles = () => {
     setMascotaParaModalDetalles(idMascota); 
   }

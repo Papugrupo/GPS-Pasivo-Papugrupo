@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { obtenerMascota, actualizarMascota } from '../services/mascota.service.js';
+import {calcularEdad} from '../utils/dateUtils.js';
 
 const ModalMascota = ({ idMascota, closeModal, onMascotaActualizada }) => {
   const [mascota, setMascota] = useState(null);
@@ -85,17 +86,6 @@ const ModalMascota = ({ idMascota, closeModal, onMascotaActualizada }) => {
     }
   };
 
-  const calcularEdad = (fechaNacimiento) => {
-    if (!fechaNacimiento) return 'N/A';
-    const fechaActual = new Date();
-    const fechaNac = new Date(fechaNacimiento);
-    let edad = fechaActual.getFullYear() - fechaNac.getFullYear();
-    const mes = fechaActual.getMonth() - fechaNac.getMonth();
-    if (mes < 0 || (mes === 0 && fechaActual.getDate() < fechaNac.getDate())) {
-      edad--;
-    }
-    return edad;
-  };
 
   if (!mascota) {
     return (
@@ -294,7 +284,7 @@ const ModalMascota = ({ idMascota, closeModal, onMascotaActualizada }) => {
                     <strong>Raza:</strong> {mascota.raza || 'N/A'}
                   </div>
                   <div className="p-3 bg-blue-100 rounded-lg">
-                    <strong>Edad:</strong> {calcularEdad(mascota.fechaNacimiento)} años
+                    <strong>Edad:</strong> {calcularEdad(mascota.fechaNacimiento)}
                   </div>
                   <div className="p-3 bg-blue-100 rounded-lg">
                     <strong>Sexo:</strong> {mascota.sexo || 'N/A'}

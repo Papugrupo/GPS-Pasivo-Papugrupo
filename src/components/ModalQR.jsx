@@ -1,6 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { obtenerMascota } from '../services/mascota.service.js';
 import QRCode from 'qrcode';
+import {calcularEdad} from '../utils/dateUtils.js';
+
 
 const ModalQR = ({ idMascota, closeModal }) => {
   const [mascota, setMascota] = useState(null);
@@ -51,17 +53,6 @@ const ModalQR = ({ idMascota, closeModal }) => {
       document.removeEventListener('mousedown', handleOutsideClick);
     };
   }, []);
-
-  const calcularEdad = (fechaNacimiento) => {
-    const fechaActual = new Date();
-    const fechaNac = new Date(fechaNacimiento);
-    let edad = fechaActual.getFullYear() - fechaNac.getFullYear();
-    const mes = fechaActual.getMonth() - fechaNac.getMonth();
-    if (mes < 0 || (mes === 0 && fechaActual.getDate() < fechaNac.getDate())) {
-      edad--;
-    }
-    return edad;
-  };
 
   const descargarQR = () => {
     if (imagenQR) {
@@ -119,7 +110,7 @@ const ModalQR = ({ idMascota, closeModal }) => {
                 <strong>Raza:</strong> {mascota.raza}
               </div>
               <div className="p-3 bg-primary rounded-lg text-black">
-                <strong>Edad:</strong> {calcularEdad(mascota.fechaNacimiento)} años
+                <strong>Edad:</strong> {calcularEdad(mascota.fechaNacimiento)}
               </div>
             </div>
           </div>
