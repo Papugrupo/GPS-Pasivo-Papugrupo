@@ -19,6 +19,8 @@ const RegistrarUsuario = () => {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [submitError, setSubmitError] = useState('');
     const [submitSuccess, setSubmitSuccess] = useState('');
+    const [showPassword, setShowPassword] = useState(false);
+    const [showRepeatPassword, setShowRepeatPassword] = useState(false);
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -266,22 +268,36 @@ const RegistrarUsuario = () => {
 
                     <div className="flex flex-col sm:flex-row sm:items-center space-y-2 sm:space-y-0 sm:space-x-4">
                         <label className="text-gray-700 font-semibold sm:w-40">Contraseña</label>
-                        <input
-                            type="password"
-                            name="contrasena"
-                            placeholder='Ingrese su contraseña'
-                            value={formData.contrasena}
-                            onChange={handleChange}
-                            className="w-full bg-gray-100 px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
-                            required
-                        />
+                        <div className="relative w-full">
+                            <input
+                                type={showPassword ? 'text' : 'password'}
+                                name="contrasena"
+                                placeholder='Ingrese su contraseña'
+                                value={formData.contrasena}
+                                onChange={handleChange}
+                                className="w-full bg-gray-100 px-4 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+                                required
+                            />
+                            <button
+                                type="button"
+                                onClick={() => setShowPassword(!showPassword)}
+                                className="absolute right-3 top-2.5 text-gray-500 hover:text-gray-700"
+                                disabled={isSubmitting}
+                            >
+                                {showPassword ? (
+                                    <span className="text-sm">Ocultar</span>
+                                ) : (
+                                    <span className="text-sm">Mostrar</span>
+                                )}
+                            </button>
+                        </div>
                     </div>
 
                     <div className="flex flex-col sm:flex-row sm:items-center space-y-2 sm:space-y-0 sm:space-x-4">
                         <label className="text-gray-700 font-semibold sm:w-40">Repetir contraseña</label>
-                        <div className="w-full">
+                        <div className="relative w-full">
                             <input
-                                type="password"
+                                type={showRepeatPassword ? 'text' : 'password'}
                                 name="repetirContrasena"
                                 placeholder='Repita su contraseña'
                                 value={formData.repetirContrasena}
@@ -289,9 +305,21 @@ const RegistrarUsuario = () => {
                                 className={`w-full bg-gray-100 px-4 py-2 rounded-lg focus:outline-none focus:ring-2 ${passwordError ? 'border-red-500 focus:ring-red-400' : 'focus:ring-blue-400'}`}
                                 required
                             />
-                            {passwordError && (
-                                <p className="text-red-500 text-sm mt-1">{passwordError}</p>
-                            )}
+                            <button
+                                type="button"
+                                onClick={() => setShowRepeatPassword(!showRepeatPassword)}
+                                className="absolute right-3 top-2.5 text-gray-500 hover:text-gray-700"
+                                disabled={isSubmitting}
+                            >
+                                {showRepeatPassword ? (
+                                    <span className="text-sm">Ocultar</span>
+                                ) : (
+                                    <span className="text-sm">Mostrar</span>
+                                )}
+                            </button>
+                        {passwordError && (
+                            <p className="text-red-500 text-sm mt-1">{passwordError}</p>
+                        )}
                         </div>
                     </div>
 
