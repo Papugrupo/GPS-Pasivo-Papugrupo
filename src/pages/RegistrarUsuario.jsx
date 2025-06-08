@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { registrarUsuario } from '../services/usuario.service';
+import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 
 const RegistrarUsuario = () => {
     const [formData, setFormData] = useState({
@@ -21,6 +23,9 @@ const RegistrarUsuario = () => {
     const [submitSuccess, setSubmitSuccess] = useState('');
     const [showPassword, setShowPassword] = useState(false);
     const [showRepeatPassword, setShowRepeatPassword] = useState(false);
+
+    const { login } = useAuth();
+    const navigate = useNavigate();
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -156,16 +161,20 @@ const RegistrarUsuario = () => {
         try {
             setIsSubmitting(true);
             const response = await registrarUsuario(userData);
-            setSubmitSuccess('Te haz registrado exitosamente. Ahora puedes iniciar sesión.');
             
-            setFormData({
-                nombre: '',
-                direccion: '',
-                telefono: '',
-                correo: '',
-                contrasena: '',
-                repetirContrasena: ''
-            });
+            if (response && response.token) {
+                // Guardar el token y el email en localStorage
+                localStorage.setItem('token', response.token);
+                localStorage.setItem('userEmail', formData.correo);
+                
+                // Llamar a la función login del contexto de autenticación
+                login({ email: formData.correo, nombre: formData.nombre }, response.token);
+                
+                // Redirigir al mapa
+                navigate('/mapa');
+            } else {
+                setSubmitError('Error en la respuesta del servidor');
+            }
         } catch (error) {
             console.error('Error al registrar:', error);
             setSubmitError(error.response?.data?.message || 'Error al registrar usuario. Intente nuevamente.');
