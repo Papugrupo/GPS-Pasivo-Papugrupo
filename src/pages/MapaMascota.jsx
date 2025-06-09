@@ -246,7 +246,7 @@ const MapaMascota = () => {
                   </div>
                 </div>
               ) : (
-              <div className="space-y-2 max-h-[calc(100vh-350px)] overflow-y-auto pr-1"> {/* ESTE DIV AHORA ESTÁ EN EL ELSE */}
+              <div className="space-y-2 mh-[280px] md:h-[320px] lg:h-[380px] overflow-y-auto pr-1"> {/* ESTE DIV AHORA ESTÁ EN EL ELSE */}
                 {listaMascotas.map((mascota) => (
                     <TarjetaMascota
                       key={mascota.idMascota} 
@@ -257,7 +257,7 @@ const MapaMascota = () => {
                   ))}
                 </div> 
               )}
-              <div className='flex justify-end items-center px-4  h-30'>
+              <div className='flex justify-end items-center mt-4'>
                 <button className='w-full hover:bg-blue-600 hover:text-white rounded-lg p-2 mb-2 bg-blue-300 cursor-pointer' 
                       title='Registrar Mascota'
                       onClick={() =>navigate('/registro-mascota')}>
@@ -269,7 +269,7 @@ const MapaMascota = () => {
 
           {/* Sección central - Mapa */}
           <div className="lg:col-span-3">
-            <div className="bg-white rounded-2xl shadow-md p-4 flex flex-col">
+            <div className="bg-white rounded-2xl shadow-md p-4 flex flex-col h-full">
               <div className="flex items-center justify-center gap-2 mb-4">
                 <MdMap className="text-lg text-green-600" />
                 <h2 className="text-lg font-bold text-gray-800">Mapa de Ubicaciones</h2>
@@ -278,7 +278,7 @@ const MapaMascota = () => {
               {selectedMascotas.length > 0 ? (
                 <>
                   {/* Mapa con altura optimizada */}
-                  <div className="h-[280px] md:h-[320px] lg:h-[360px] w-full rounded-xl overflow-hidden border border-gray-200">
+                  <div className="h-[280px] md:h-[320px] lg:h-[380px] w-full rounded-xl overflow-hidden border border-gray-200">
                     <MapMascotaComponent
                       mascotas={mascotasData}
                       puntos={puntosActivos}
