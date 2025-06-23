@@ -180,6 +180,7 @@ const MapMascotaComponent = ({ mascotas, puntos, ultimaUbicacionGlobal, botonUlt
       <div
         ref={mapContainer}
         style={{
+          zIndex:5,
           position: 'absolute',
           top: 0,
           bottom: 0,
