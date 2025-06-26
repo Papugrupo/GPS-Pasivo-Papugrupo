@@ -75,7 +75,8 @@ const nuevaMascota = () => ({
   observaciones: ''
 });
 
-const urlBaseQR = 'https://gps.bustamantedev.cl/registrar-ubicacion'
+const urlBase = import.meta.env.VITE_URL_BASE;
+const urlBaseQR = `${urlBase}/registrar-ubicación`;
 
 const RegistrarMascota = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
