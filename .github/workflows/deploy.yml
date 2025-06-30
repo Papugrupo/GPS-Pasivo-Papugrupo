@@ -24,6 +24,7 @@ jobs:
       run: |
         echo "VITE_API_BACKEND=${{ secrets.VITE_API_BACKEND }}" >> .env
         echo "VITE_MAPTILER_KEY=${{ secrets.VITE_MAPTILER_KEY }}" >> .env
+        echo "VITE_URL_BASE=${{ secrets.VITE_URL_BASE }}" >> .env
 
     - name: Build React project
       run: npm run build
